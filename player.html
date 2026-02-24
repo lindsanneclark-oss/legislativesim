@@ -12,42 +12,34 @@ body { font-family: 'Segoe UI', sans-serif; background: #0a1628; color: #f0f0f0;
 h1 { font-size: 1.3rem; color: #FFFFFF; margin-bottom: 6px; }
 h2 { font-size: 1rem; color: #B0C4FF; margin-bottom: 8px; }
 p { color: #B0C4FF; line-height: 1.5; font-size: 0.9rem; }
-input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #3A3F8F; background: #0e2044; color: #fff; font-size: 1rem; margin-top: 6px; }
+input[type="text"] { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #3A3F8F; background: #0e2044; color: #fff; font-size: 1rem; margin-top: 6px; }
 .btn { display: block; width: 100%; padding: 14px; border-radius: 10px; border: none; cursor: pointer; font-size: 1rem; font-weight: bold; margin-top: 10px; transition: opacity 0.2s; }
 .btn:disabled { opacity: 0.35; cursor: not-allowed; }
 .btn:hover:not(:disabled) { opacity: 0.85; }
 .btn-primary { background: #3A3F8F; color: #fff; }
-.btn-yes { background: #27ae60; color: #fff; }
-.btn-no { background: #B22234; color: #fff; }
+.btn-yes { background: #27ae60; color: #fff; font-size: 1.1rem; padding: 18px; }
+.btn-no  { background: #B22234; color: #fff; font-size: 1.1rem; padding: 18px; }
 .btn-react { background: #0e2044; color: #f0f0f0; border: 2px solid #3A3F8F; padding: 10px; font-size: 1.3rem; border-radius: 10px; display: inline-block; width: auto; margin: 4px; cursor: pointer; transition: transform 0.1s; }
 .btn-react:active { transform: scale(1.2); }
 .card { background: #0e2044; border-radius: 12px; padding: 16px; border: 1px solid #3A3F8F; margin-bottom: 12px; }
 .label { font-size: 0.72rem; color: #B0C4FF; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
 #join-error { color: #ff6666; font-size: 0.82rem; margin-top: 6px; display: none; }
-.char-icon { font-size: 3rem; text-align: center; margin-bottom: 8px; }
-.char-name { font-size: 1.3rem; font-weight: bold; color: #FFD700; text-align: center; }
-.char-role-label { text-align: center; color: #B0C4FF; font-size: 0.85rem; margin-top: 2px; }
-.stance-box { border-radius: 10px; padding: 10px 14px; margin-top: 10px; }
-.interest-box { background: #071530; border-radius: 8px; padding: 10px; margin-top: 8px; font-size: 0.85rem; color: #B0C4FF; line-height: 1.5; font-style: italic; border-left: 3px solid #B22234; }
 .status-dot { width: 9px; height: 9px; border-radius: 50%; background: #FFD700; display: inline-block; margin-right: 5px; animation: pulse 1.5s infinite; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
 .react-grid { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 10px; }
-.vote-btn-row { display: flex; gap: 10px; margin-top: 12px; }
-.vote-btn-row .btn { margin-top: 0; }
+.vote-btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
 #voted-confirm { display: none; text-align: center; padding: 20px; }
-#debug-log { background: #071530; border: 1px solid #0e2044; border-radius: 6px; padding: 6px; font-size: 0.65rem; color: #3A3F8F; max-height: 60px; overflow-y: auto; font-family: monospace; margin-top: 8px; }
 .speaker-highlight { background: linear-gradient(135deg, #1a0a0a, #0a1628); border: 2px solid #B22234; border-radius: 10px; padding: 12px; margin-bottom: 10px; text-align: center; }
-.result-pass { color: #27ae60; font-size: 1.3rem; font-weight: bold; }
-.result-fail { color: #ff6666; font-size: 1.3rem; font-weight: bold; }
-/* Top stripe accent */
 .top-stripe { height: 6px; background: linear-gradient(90deg, #B22234 33%, #FFFFFF 33%, #FFFFFF 66%, #3A3F8F 66%); }
+.role-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: bold; letter-spacing: 1px; margin-top: 6px; }
+.bill-item { background: #071530; border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; border-left: 3px solid #3A3F8F; font-size: 0.85rem; color: #e0e0e0; line-height: 1.5; }
+.bill-item .bill-author { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
 </style>
 </head>
 <body>
-
 <div class="top-stripe"></div>
 
-<!-- JOIN -->
+<!-- ── JOIN ── -->
 <div class="screen active" id="screen-join">
   <div style="text-align:center;padding-top:30px;">
     <div style="font-size:3rem;">🏛️</div>
@@ -62,50 +54,72 @@ input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #3A3F8
     <div id="join-error">Game not found. Check the code and try again.</div>
     <button class="btn btn-primary" onclick="joinGame()">Join Game</button>
   </div>
-  <div id="debug-log">Ready...</div>
 </div>
 
-<!-- LOBBY -->
+<!-- ── LOBBY / CAUCUS ── -->
 <div class="screen" id="screen-lobby">
-  <div style="text-align:center;padding-top:20px;">
-    <div style="font-size:0.72rem;color:#B0C4FF;text-transform:uppercase;letter-spacing:1px;">You have been assigned</div>
-    <div class="char-icon" id="lobby-icon">⏳</div>
-    <div class="char-name" id="lobby-char-name">Waiting...</div>
-    <div class="char-role-label" id="lobby-char-role"></div>
+  <div style="text-align:center;padding-top:16px;">
+    <div style="font-size:0.72rem;color:#B0C4FF;text-transform:uppercase;letter-spacing:1px;">You are a</div>
+    <div id="lobby-role-name" style="font-size:1.6rem;font-weight:bold;color:#FFFFFF;margin-top:4px;">–</div>
+    <div id="lobby-role-title" style="font-size:0.85rem;color:#B0C4FF;margin-top:2px;"></div>
+    <div id="lobby-role-badge"></div>
   </div>
-  <div id="lobby-stance-box" class="stance-box" style="margin-top:12px;"></div>
-  <div id="lobby-interest-box" class="interest-box" style="display:none;"></div>
-  <div class="card" style="margin-top:14px;">
-    <div class="label">Policy Scenario</div>
-    <div id="lobby-problem" style="color:#FFFFFF;font-weight:bold;margin-top:4px;">Waiting for host to start...</div>
-    <div id="lobby-problem-desc" style="margin-top:6px;font-size:0.85rem;color:#B0C4FF;"></div>
+
+  <!-- Lead Legislator — own bill -->
+  <div id="lobby-leg-section" style="display:none;margin-top:14px;">
+    <div class="card" style="border-color:#FFD700;">
+      <div class="label" style="color:#FFD700;">Your Bill to Present</div>
+      <div id="lobby-leg-bill" style="color:#FFFFFF;font-size:0.9rem;line-height:1.5;margin-top:6px;"></div>
+    </div>
+    <div class="card">
+      <div class="label">Your Role</div>
+      <div style="font-size:0.85rem;color:#B0C4FF;line-height:1.6;margin-top:4px;">
+        You are a <strong style="color:#FFFFFF;">Lead Legislator</strong>. You will present your bill to the full chamber. After your presentation, everyone — including fellow Congress members — will vote YES or NO on your bill. Prepare your argument!
+      </div>
+    </div>
   </div>
-  <div class="card">
-    <div class="label">Proposed Bill</div>
-    <div id="lobby-bill" style="color:#FFFFFF;font-size:0.9rem;line-height:1.5;margin-top:4px;">–</div>
+
+  <!-- Congress Member — all bills -->
+  <div id="lobby-congress-section" style="display:none;margin-top:14px;">
+    <div class="card">
+      <div class="label">Your Role</div>
+      <div style="font-size:0.85rem;color:#B0C4FF;line-height:1.6;margin-top:4px;">
+        You are a <strong style="color:#FFFFFF;">Congress Member</strong>. You will listen to each legislator present their bill, then cast a <strong style="color:#27ae60;">YES</strong> or <strong style="color:#B22234;">NO</strong> vote on each one. Use the caucus time to read all the bills below.
+      </div>
+    </div>
+    <div class="card">
+      <div class="label">All Bills on the Floor</div>
+      <div id="lobby-all-bills" style="margin-top:6px;"></div>
+    </div>
   </div>
-  <div style="text-align:center;margin-top:10px;">
+
+  <div style="text-align:center;margin-top:14px;">
     <span class="status-dot"></span>
-    <span style="color:#B0C4FF;font-size:0.85rem;" id="lobby-status">Waiting for host...</span>
+    <span style="color:#B0C4FF;font-size:0.85rem;" id="lobby-status">Waiting for host to start...</span>
   </div>
-  <div id="debug-log">Listening...</div>
 </div>
 
-<!-- SPEAKING -->
+<!-- ── SPEAKING / REACTIONS ── -->
 <div class="screen" id="screen-speaking">
   <div class="speaker-highlight">
-    <div style="font-size:0.72rem;color:#B0C4FF;text-transform:uppercase;letter-spacing:1px;">Now Speaking</div>
-    <div id="now-speaking-name" style="font-size:1.1rem;font-weight:bold;color:#FFD700;margin-top:4px;">–</div>
+    <div style="font-size:0.72rem;color:#B0C4FF;text-transform:uppercase;letter-spacing:1px;">Now Presenting</div>
+    <div id="now-speaking-name" style="font-size:1.15rem;font-weight:bold;color:#FFD700;margin-top:4px;">–</div>
+    <div id="now-speaking-title" style="font-size:0.78rem;color:#B0C4FF;margin-top:2px;"></div>
   </div>
-  <div id="your-turn-box" style="display:none;" class="card">
-    <div style="color:#FFD700;font-weight:bold;font-size:1rem;margin-bottom:6px;text-align:center;">🎤 IT'S YOUR TURN TO SPEAK!</div>
-    <div class="label">Your Assigned Stance</div>
-    <div id="your-stance" style="font-weight:bold;font-size:1rem;margin-top:4px;"></div>
-    <div style="margin-top:8px;font-size:0.85rem;color:#B0C4FF;">State your position on the bill. Argue from your assigned stance and represent your character's interests.</div>
-  </div>
+
   <div class="card">
-    <div class="label">React in real time 👇</div>
-    <p style="font-size:0.82rem;margin-bottom:4px;">Tap to send a reaction that appears on the host screen.</p>
+    <div class="label">Bill Being Presented</div>
+    <div id="now-speaking-bill" style="color:#FFFFFF;font-size:0.88rem;line-height:1.55;margin-top:6px;">–</div>
+  </div>
+
+  <!-- Your turn box (lead legislators only) -->
+  <div id="your-turn-box" style="display:none;" class="card" style="border:2px solid #FFD700;">
+    <div style="color:#FFD700;font-weight:bold;font-size:1rem;margin-bottom:6px;text-align:center;">🎤 IT'S YOUR TURN TO SPEAK!</div>
+    <div style="font-size:0.85rem;color:#B0C4FF;line-height:1.6;">Present your bill to the chamber. Explain why it should pass. Be persuasive — everyone will vote on your bill after you speak!</div>
+  </div>
+
+  <div class="card">
+    <div class="label">Send a Live Reaction 👇</div>
     <div class="react-grid">
       <button class="btn-react" onclick="sendReaction('👏')">👏</button>
       <button class="btn-react" onclick="sendReaction('🤔')">🤔</button>
@@ -117,62 +131,57 @@ input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #3A3F8
       <button class="btn-react" onclick="sendReaction('✅')">✅</button>
     </div>
     <div style="margin-top:10px;">
-      <div class="label">Or type a word (max 20 chars)</div>
+      <div class="label">Or type a short reaction (max 20 chars)</div>
       <div style="display:flex;gap:6px;margin-top:4px;">
-        <input id="react-text" type="text" maxlength="20" placeholder="e.g. Agree! or Too radical" style="margin-top:0;flex:1;" />
+        <input id="react-text" type="text" maxlength="20" placeholder="e.g. Too radical!" style="margin-top:0;flex:1;" />
         <button class="btn btn-primary" onclick="sendTextReaction()" style="margin-top:0;width:auto;padding:0 14px;">Send</button>
       </div>
     </div>
   </div>
-  <div style="text-align:center;margin-top:6px;">
+
+  <div style="text-align:center;margin-top:4px;">
     <span class="status-dot"></span>
-    <span style="color:#B0C4FF;font-size:0.82rem;" id="speaking-status">Listening to speeches...</span>
+    <span style="color:#B0C4FF;font-size:0.82rem;" id="speaking-status">Listening to presentations...</span>
   </div>
 </div>
 
-<!-- VOTING -->
+<!-- ── VOTING ── -->
 <div class="screen" id="screen-voting">
-  <h1>🗳️ Cast Your Vote</h1>
+  <h1 style="text-align:center;margin-bottom:4px;">🗳️ Cast Your Vote</h1>
+  <p style="text-align:center;font-size:0.82rem;margin-bottom:14px;">Vote on the bill just presented.</p>
+
+  <div class="card" id="voting-bill-card">
+    <div class="label" id="voting-bill-author"></div>
+    <div id="voting-bill-text" style="color:#FFFFFF;font-size:0.9rem;line-height:1.55;margin-top:6px;"></div>
+  </div>
+
   <div class="card">
-    <div class="label">Proposed Bill</div>
-    <div id="vote-bill-text" style="color:#FFFFFF;font-size:0.9rem;line-height:1.5;margin-top:4px;"></div>
+    <div class="label">Your Title</div>
+    <div id="voting-player-title" style="font-weight:bold;color:#FFD700;margin-top:2px;"></div>
+    <div style="font-size:0.78rem;color:#B0C4FF;margin-top:4px;">Vote based on what you've heard. Does this bill deserve to pass?</div>
   </div>
-  <div class="card">
-    <div class="label">Your Character</div>
-    <div id="vote-char-name" style="font-weight:bold;color:#FFD700;"></div>
-    <div id="vote-stance" style="font-size:0.82rem;color:#B0C4FF;margin-top:2px;"></div>
-    <div style="font-size:0.78rem;color:#B0C4FF;margin-top:4px;border-top:1px solid #3A3F8F;padding-top:6px;">Vote based on your character's interests and assigned stance.</div>
-  </div>
-  <div id="voted-confirm">
-    <div style="font-size:2.5rem;text-align:center;">⭐</div>
-    <div style="color:#FFD700;font-weight:bold;margin-top:6px;text-align:center;font-size:1.1rem;">Vote submitted!</div>
-    <div style="color:#B0C4FF;font-size:0.85rem;margin-top:4px;text-align:center;">Waiting for host to reveal results...</div>
-  </div>
+
   <div id="vote-buttons">
     <div class="vote-btn-row">
-      <button class="btn btn-yes" onclick="castVote('yes')">✅ YES — Support</button>
-      <button class="btn btn-no" onclick="castVote('no')">❌ NO — Oppose</button>
+      <button class="btn btn-yes" onclick="castVote('yes')">✅ YES<br><span style="font-size:0.75rem;font-weight:normal;">Support this bill</span></button>
+      <button class="btn btn-no"  onclick="castVote('no')">❌ NO<br><span style="font-size:0.75rem;font-weight:normal;">Oppose this bill</span></button>
     </div>
+  </div>
+
+  <div id="voted-confirm">
+    <div style="font-size:3rem;text-align:center;">⭐</div>
+    <div style="color:#FFD700;font-weight:bold;margin-top:8px;text-align:center;font-size:1.1rem;">Vote submitted!</div>
+    <div style="color:#B0C4FF;font-size:0.85rem;margin-top:4px;text-align:center;">Waiting for the next bill...</div>
   </div>
 </div>
 
-<!-- RESULTS -->
+<!-- ── RESULTS ── -->
 <div class="screen" id="screen-results">
-  <h1>📊 Round Results</h1>
-  <div class="card" style="text-align:center;border:2px solid #B22234;">
-    <div id="result-verdict-player">–</div>
-  </div>
-  <div class="card">
-    <div class="label">Bill Type Revealed</div>
-    <div id="result-bill-type" style="font-weight:bold;font-size:1rem;margin-top:4px;"></div>
-  </div>
-  <div class="card">
-    <div class="label">What This Means</div>
-    <div id="result-explanation-player" style="color:#B0C4FF;font-size:0.88rem;line-height:1.6;margin-top:4px;"></div>
-  </div>
+  <h1 style="margin-bottom:14px;">📊 Final Results</h1>
+  <div id="results-list"></div>
   <div style="text-align:center;margin-top:14px;padding:16px;background:#0e2044;border-radius:12px;border:1px solid #3A3F8F;">
-    <span class="status-dot"></span>
-    <span style="color:#B0C4FF;font-size:0.85rem;" id="results-status">Waiting for next round...</span>
+    <div style="color:#FFD700;font-weight:bold;margin-bottom:6px;">🏁 Simulation Complete</div>
+    <div style="color:#B0C4FF;font-size:0.85rem;line-height:1.6;">Discuss with your class: which bills passed? Did incremental or sweeping reforms do better?</div>
   </div>
 </div>
 
@@ -181,114 +190,143 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/fireba
 import { getDatabase, ref, get, update, onValue, push } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
 const FB_URL = "https://legislative-game-default-rtdb.firebaseio.com";
-let db, gameCode, playerId, playerData = {}, currentRound = 0;
+let db, gameCode, playerId, playerData = {}, lastPhase = '';
 
-function log(m) {
-  document.querySelectorAll('#debug-log').forEach(el => {
-    el.innerHTML += `<div>${new Date().toLocaleTimeString()}: ${m}</div>`;
-    el.scrollTop = el.scrollHeight;
-  });
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
 }
-function show(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
 
+// Auto-fill code from URL param
 const params = new URLSearchParams(window.location.search);
 if (params.get('code')) document.getElementById('inp-code').value = params.get('code').toUpperCase();
 
+// ── JOIN ──────────────────────────────────────────────────────────────────────
 window.joinGame = async function() {
   const code = document.getElementById('inp-code').value.trim().toUpperCase();
   const name = document.getElementById('inp-name').value.trim();
-  if (!code || !name) { alert('Enter code and name.'); return; }
+  if (!code || !name) { alert('Please enter both a game code and your name.'); return; }
+
   try {
     const app = initializeApp({ databaseURL: FB_URL }, `p_${Date.now()}`);
     db = getDatabase(app);
     const snap = await get(ref(db, `games/${code}`));
     if (!snap.exists()) { document.getElementById('join-error').style.display = 'block'; return; }
+
     gameCode = code;
-    playerId = 'p_' + Date.now();
-    await update(ref(db, `games/${gameCode}/players/${playerId}`), { name, joined: true });
+    playerId = 'p_' + Date.now() + '_' + Math.random().toString(36).substring(2,6);
+    await update(ref(db, `games/${gameCode}/players/${playerId}`), { name, joined: true, voted: false, currentVote: null });
     show('screen-lobby');
     listenToGame();
-  } catch(e) { log(`ERROR: ${e.message}`); document.getElementById('join-error').style.display = 'block'; }
+  } catch(e) {
+    document.getElementById('join-error').style.display = 'block';
+  }
 };
 
+// ── MAIN LISTENER ─────────────────────────────────────────────────────────────
 function listenToGame() {
   onValue(ref(db, `games/${gameCode}`), snap => {
-    const state = snap.val(); if (!state) return;
+    const state = snap.val();
+    if (!state) return;
     const me = (state.players || {})[playerId] || {};
     playerData = me;
     const phase = state.phase;
-    const active = document.querySelector('.screen.active')?.id;
 
-    if (me.charName) updateLobbyChar(me, state);
+    // Once assigned, populate lobby
+    if (me.isLegislator !== undefined) populateLobby(me, state);
 
     if (phase === 'lobby') {
-      if (active !== 'screen-lobby') show('screen-lobby');
-    } else if (phase === 'speaking' || phase === 'pre-vote') {
-      if (active === 'screen-lobby' || state.round !== currentRound) {
-        currentRound = state.round;
-        show('screen-speaking');
-      }
+      show('screen-lobby');
+      document.getElementById('lobby-status').textContent = 'Waiting for host to start...';
+
+    } else if (phase === 'caucus') {
+      show('screen-lobby');
+      document.getElementById('lobby-status').textContent = '📚 Caucus time — read the bills and prepare!';
+
+    } else if (phase === 'speaking' || phase === 'between') {
+      show('screen-speaking');
       updateSpeakingScreen(state, me);
-    } else if (phase === 'voting' && !me.voted) {
-      showVotingScreen(state, me);
-    } else if (phase === 'results') {
-      if (active !== 'screen-results') showResultsScreen(state);
+
+    } else if (phase === 'voting') {
+      // Only show voting if player hasn't voted yet this round
+      if (!me.voted) {
+        showVotingScreen(state, me);
+      } else {
+        // Already voted — show waiting state
+        if (document.getElementById('screen-voting').classList.contains('active')) {
+          document.getElementById('vote-buttons').style.display = 'none';
+          document.getElementById('voted-confirm').style.display = 'block';
+        }
+      }
+
+    } else if (phase === 'results' || phase === 'done') {
+      if (phase === 'results') showResultsScreen(state);
     }
+
+    lastPhase = phase;
   });
 }
 
-function updateLobbyChar(me, state) {
-  document.getElementById('lobby-icon').textContent = me.charIcon || '👥';
-  document.getElementById('lobby-char-name').textContent = me.charName || '–';
-  document.getElementById('lobby-char-role').textContent = me.charRole || '';
-  const stanceBox = document.getElementById('lobby-stance-box');
-  const isInc = me.stance === 'incrementalism';
-  stanceBox.style.background = isInc ? '#0a2a14' : '#2a0a0a';
-  stanceBox.innerHTML = `
-    <div style="font-size:0.72rem;color:${isInc?'#27ae60':'#ff6666'};text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Your Assigned Stance</div>
-    <div style="font-size:1rem;font-weight:bold;color:${isInc?'#27ae60':'#ff6666'};">${(me.stance||'').toUpperCase()}</div>
-    <div style="font-size:0.8rem;color:#B0C4FF;margin-top:4px;">You must argue from this position when it's your turn to speak.</div>`;
-  if (me.interest && me.isMajor) {
-    const ib = document.getElementById('lobby-interest-box');
-    ib.style.display = 'block';
-    ib.textContent = me.interest;
+// ── POPULATE LOBBY ────────────────────────────────────────────────────────────
+function populateLobby(me, state) {
+  const isLeg = me.isLegislator;
+
+  if (isLeg) {
+    const leg = (state.legislators || []).find(l => l.key === me.legKey) || {};
+    document.getElementById('lobby-role-name').textContent = me.legName || 'Legislator';
+    document.getElementById('lobby-role-name').style.color = me.legColor || '#FFD700';
+    document.getElementById('lobby-role-title').textContent = me.legTitle || '';
+    document.getElementById('lobby-role-badge').innerHTML = `<span class="role-badge" style="background:${me.legColor||'#3A3F8F'};color:#fff;">LEAD LEGISLATOR</span>`;
+    document.getElementById('lobby-leg-bill').textContent = me.billText || '–';
+    document.getElementById('lobby-leg-section').style.display = 'block';
+    document.getElementById('lobby-congress-section').style.display = 'none';
+  } else {
+    document.getElementById('lobby-role-name').textContent = me.congressTitle || 'Congress Member';
+    document.getElementById('lobby-role-name').style.color = '#FFFFFF';
+    document.getElementById('lobby-role-title').textContent = 'Independent Congress Member';
+    document.getElementById('lobby-role-badge').innerHTML = `<span class="role-badge" style="background:#3A3F8F;color:#fff;">CONGRESS MEMBER</span>`;
+    document.getElementById('lobby-leg-section').style.display = 'none';
+    document.getElementById('lobby-congress-section').style.display = 'block';
+
+    // Populate all bills
+    const bills = state.bills || [];
+    document.getElementById('lobby-all-bills').innerHTML = bills.map(b => `
+      <div class="bill-item" style="border-left-color:${b.color||'#3A3F8F'};">
+        <div class="bill-author" style="color:${b.color||'#B0C4FF'};">${b.legName} — ${b.legTitle||''}</div>
+        ${b.text}
+      </div>`).join('');
   }
-  if (state.scenario) {
-    document.getElementById('lobby-problem').textContent = state.scenario.problem || '';
-    document.getElementById('lobby-problem-desc').textContent = state.scenario.problemDesc || '';
-  }
-  if (state.bill) document.getElementById('lobby-bill').textContent = state.bill;
-  document.getElementById('lobby-status').textContent = me.isMajor
-    ? "Prepare your argument. Host will call you when it's your turn."
-    : 'Get ready to react and vote!';
 }
 
-const SPEAKER_NAMES = {
-  Senator: '🏛️ Senator Olive Politicks',
-  HouseRep: '📋 Rep. Marcus Ledger',
-  LobbyistA: '💼 Vera Cashwell',
-  LobbyistB: '✊ Hank Pressure',
-  Executive: '🦅 Secretary Diana Powers',
-  MediaRep: '📺 Sal Scoop'
-};
-
+// ── SPEAKING SCREEN ───────────────────────────────────────────────────────────
 function updateSpeakingScreen(state, me) {
   const cs = state.currentSpeaker;
-  document.getElementById('now-speaking-name').textContent = cs
-    ? (SPEAKER_NAMES[cs] || cs)
-    : (state.phase === 'pre-vote' ? 'All speakers done — voting opens soon.' : 'Waiting for host...');
-  const myTurn = me.isMajor && me.charKey === cs;
-  document.getElementById('your-turn-box').style.display = myTurn ? 'block' : 'none';
-  if (myTurn) {
-    const isInc = me.stance === 'incrementalism';
-    document.getElementById('your-stance').textContent = (me.stance || '').toUpperCase();
-    document.getElementById('your-stance').style.color = isInc ? '#27ae60' : '#ff6666';
+  const bills = state.bills || [];
+  const currentBill = bills.find(b => b.legKey === cs);
+  const legislators = state.legislators || [];
+  const currentLeg = legislators.find(l => l.key === cs);
+
+  if (cs && currentLeg) {
+    document.getElementById('now-speaking-name').textContent = currentLeg.name;
+    document.getElementById('now-speaking-name').style.color = currentLeg.color || '#FFD700';
+    document.getElementById('now-speaking-title').textContent = currentLeg.title || '';
+    document.getElementById('now-speaking-bill').textContent = currentBill ? currentBill.text : '–';
+    document.getElementById('speaking-status').textContent = `Listen to ${currentLeg.name}'s presentation`;
+  } else {
+    document.getElementById('now-speaking-name').textContent = state.phase === 'between'
+      ? 'Vote recorded — next bill coming up' : 'Waiting for host...';
+    document.getElementById('now-speaking-name').style.color = '#FFD700';
+    document.getElementById('now-speaking-title').textContent = '';
+    document.getElementById('now-speaking-bill').textContent = '–';
+    document.getElementById('speaking-status').textContent = 'Waiting for next speaker...';
   }
-  document.getElementById('speaking-status').textContent = cs
-    ? `React to ${SPEAKER_NAMES[cs] || cs}'s statement`
-    : 'Waiting for next speaker...';
+
+  // Show "your turn" box only to the current lead legislator
+  const myTurn = me.isLegislator && me.legKey === cs;
+  document.getElementById('your-turn-box').style.display = myTurn ? 'block' : 'none';
 }
 
+// ── REACTIONS ─────────────────────────────────────────────────────────────────
 window.sendReaction = async function(emoji) {
   if (!db || !gameCode) return;
   await push(ref(db, `games/${gameCode}/reactions`), { text: emoji, name: playerData.name || '?', ts: Date.now() });
@@ -300,31 +338,66 @@ window.sendTextReaction = async function() {
   document.getElementById('react-text').value = '';
 };
 
+// ── VOTING SCREEN ─────────────────────────────────────────────────────────────
 function showVotingScreen(state, me) {
-  document.getElementById('vote-bill-text').textContent = state.bill || '–';
-  document.getElementById('vote-char-name').textContent = `${me.charIcon || ''} ${me.charName || 'You'}`;
-  document.getElementById('vote-stance').textContent = `Stance: ${(me.stance || '').toUpperCase()}`;
-  document.getElementById('voted-confirm').style.display = 'none';
+  const cvb = state.currentVotingBill || {};
+  document.getElementById('voting-bill-author').textContent = cvb.legName ? `Bill by ${cvb.legName}` : 'Current Bill';
+  document.getElementById('voting-bill-author').style.color = cvb.color || '#B0C4FF';
+  document.getElementById('voting-bill-text').textContent = cvb.text || '–';
+  document.getElementById('voting-bill-card').style.borderColor = cvb.color || '#3A3F8F';
+  document.getElementById('voting-player-title').textContent = me.isLegislator
+    ? `${me.legName} — Lead Legislator`
+    : `${me.congressTitle || 'Congress Member'}`;
   document.getElementById('vote-buttons').style.display = 'block';
+  document.getElementById('voted-confirm').style.display = 'none';
   show('screen-voting');
 }
 
 window.castVote = async function(vote) {
-  await update(ref(db, `games/${gameCode}/players/${playerId}`), { vote, voted: true });
+  if (!db || !gameCode || !playerId) return;
+  await update(ref(db, `games/${gameCode}/players/${playerId}`), { currentVote: vote, voted: true });
   document.getElementById('vote-buttons').style.display = 'none';
   document.getElementById('voted-confirm').style.display = 'block';
 };
 
+// ── RESULTS SCREEN ────────────────────────────────────────────────────────────
 function showResultsScreen(state) {
-  const passed = state.passed;
-  document.getElementById('result-verdict-player').innerHTML = passed
-    ? '<div class="result-pass">✅ The Bill Passed</div>'
-    : '<div class="result-fail">❌ The Bill Failed</div>';
-  const isInc = state.billType === 'incremental';
-  document.getElementById('result-bill-type').innerHTML = `<span style="color:${isInc?'#27ae60':'#ff6666'};">${(state.billType||'').toUpperCase()}</span> bill`;
-  document.getElementById('result-explanation-player').textContent = state.resultSummary || '';
-  document.getElementById('results-status').textContent = state.round < 2
-    ? 'Waiting for Round 2...' : '🏁 Simulation complete! Discuss with your class.';
+  const bills = state.bills || [];
+  const results = state.billResults || {};
+
+  document.getElementById('results-list').innerHTML = bills.map(b => {
+    const r = results[b.legKey] || { yes: 0, no: 0, passed: false };
+    const total = r.yes + r.no;
+    const yesPct = total ? Math.round(r.yes / total * 100) : 0;
+    const noPct  = total ? Math.round(r.no  / total * 100) : 0;
+    const isInc = b.type === 'incremental';
+    return `<div class="card" style="border-left:4px solid ${b.color||'#3A3F8F'};">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <div>
+          <div style="font-weight:bold;color:${b.color||'#fff'};font-size:0.9rem;">${b.legName}</div>
+          <div style="font-size:0.72rem;color:#B0C4FF;">${b.legTitle||''}</div>
+        </div>
+        <div style="font-size:1rem;font-weight:bold;color:${r.passed?'#27ae60':'#ff6666'};">
+          ${r.passed ? '✅ PASSED' : '❌ FAILED'}
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:8px;font-size:0.8rem;">
+        <div style="flex:1;background:#071530;border-radius:6px;overflow:hidden;height:20px;">
+          <div style="width:${yesPct}%;background:#27ae60;height:100%;display:flex;align-items:center;padding-left:6px;font-size:0.72rem;font-weight:bold;color:#fff;">YES ${r.yes}</div>
+        </div>
+        <div style="flex:1;background:#071530;border-radius:6px;overflow:hidden;height:20px;">
+          <div style="width:${noPct}%;background:#B22234;height:100%;display:flex;align-items:center;padding-left:6px;font-size:0.72rem;font-weight:bold;color:#fff;">NO ${r.no}</div>
+        </div>
+      </div>
+      <div style="background:${isInc?'#0a2a14':'#2a0a0a'};border-radius:6px;padding:6px 10px;">
+        <span style="font-size:0.72rem;text-transform:uppercase;letter-spacing:1px;color:${isInc?'#27ae60':'#ff6666'};font-weight:bold;">${isInc?'📌 Incremental':'⚡ Sweeping'}</span>
+        <div style="font-size:0.75rem;color:#B0C4FF;margin-top:2px;">${isInc
+          ? 'Targeted change — lower opposition, limited but reliable impact.'
+          : 'Large-scale reform — high opposition, powerful but risky.'}</div>
+      </div>
+    </div>`;
+  }).join('');
+
   show('screen-results');
 }
 </script>
