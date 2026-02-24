@@ -77,7 +77,7 @@
       <div id="lobby-bill" style="color:#fff;font-weight:bold;margin-top:4px;">Loading...</div>
       <div id="lobby-desc" style="margin-top:8px;font-size:0.85rem;color:#b0c4de;"></div>
     </div>
-    <div id="debug-log" style="text-align:left;">Listening for game updates...</div>
+    <div id="debug-log" style="text-align:left;">Listening for updates...</div>
   </div>
 </div>
 
@@ -129,17 +129,17 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/fireba
 import { getDatabase, ref, get, update, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
 const FB_URL = "https://legislative-game-default-rtdb.firebaseio.com";
+
+// Role definitions — display label maps to Firebase-safe key
 const ROLES = [
-  { id: "senator",   label: "Senator / House Rep",  icon: "🏛️", desc: "You vote on bills and can propose amendments." },
-  { id: "interest",  label: "Interest Group",        icon: "💼", desc: "You lobby legislators and fund campaigns." },
-  { id: "executive", label: "Executive Branch",      icon: "🦅", desc: "You can signal support or threaten a veto." },
-  { id: "public",    label: "Public Opinion",        icon: "👥", desc: "You represent the public's approval or skepticism." },
-  { id: "media",     label: "Media Rep",             icon: "📺", desc: "You frame the narrative around the bill." }
+  { key: "Legislator",    label: "Legislator",     icon: "🏛️", desc: "You vote on bills and can propose amendments." },
+  { key: "InterestGroup", label: "Interest Group", icon: "💼", desc: "You lobby legislators and fund campaigns." },
+  { key: "Executive",     label: "Executive",      icon: "🦅", desc: "You can signal support or threaten a veto." },
+  { key: "PublicOpinion", label: "Public Opinion", icon: "👥", desc: "You represent the public's approval or skepticism." },
+  { key: "MediaRep",      label: "Media Rep",      icon: "📺", desc: "You frame the narrative around the bill." }
 ];
 
-let db, gameCode, playerId, playerRole, selectedAction = null, currentRound = 0;
-
-function safeKey(str) { return str.replace(/[.#$/[\]]/g, '_'); }
+let db, gameCode, playerId, playerKey, playerLabel, selectedAction = null, currentRound = 0;
 
 function log(msg) {
   const els = document.querySelectorAll('#debug-log');
@@ -150,7 +150,6 @@ function log(msg) {
 function show(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  log(`Screen: ${id}`);
 }
 
 const params = new URLSearchParams(window.location.search);
@@ -160,29 +159,25 @@ window.joinGame = async function() {
   const code = document.getElementById('inp-code').value.trim().toUpperCase();
   const name = document.getElementById('inp-name').value.trim();
   if (!code || !name) { alert('Please enter the game code and your name.'); return; }
-  log(`Joining game ${code} as ${name}...`);
+  log(`Joining ${code} as ${name}...`);
   try {
     const app = initializeApp({ databaseURL: FB_URL }, `player_${Date.now()}`);
     db = getDatabase(app);
     const snap = await get(ref(db, `games/${code}`));
-    if (!snap.exists()) {
-      log('Game not found!');
-      document.getElementById('join-error').style.display = 'block';
-      return;
-    }
+    if (!snap.exists()) { document.getElementById('join-error').style.display = 'block'; return; }
     gameCode = code;
     playerId = 'p_' + Date.now();
     window._playerName = name;
-    log(`Joined! Player ID: ${playerId}`);
+    log(`Game found. ID: ${playerId}`);
 
-    const taken = Object.values(snap.val().players || {}).map(p => p.role);
+    const taken = Object.values(snap.val().players || {}).map(p => p.roleKey);
     document.getElementById('role-list').innerHTML = ROLES.map(r => `
-      <div onclick="selectRole('${r.id}')" id="role-${r.id}" class="btn btn-action" style="display:flex;gap:12px;align-items:flex-start;">
+      <div onclick="selectRole('${r.key}')" id="role-${r.key}" class="btn btn-action" style="display:flex;gap:12px;align-items:flex-start;">
         <span style="font-size:1.5rem;">${r.icon}</span>
         <div>
           <div style="font-weight:bold;color:#fff;">${r.label}</div>
           <div style="font-size:0.8rem;color:#b0c4de;margin-top:2px;">${r.desc}</div>
-          ${taken.includes(r.label) ? '<div style="font-size:0.75rem;color:#e74c3c;margin-top:2px;">(taken)</div>' : ''}
+          ${taken.includes(r.key) ? '<div style="font-size:0.75rem;color:#e74c3c;margin-top:2px;">(taken)</div>' : ''}
         </div>
       </div>`).join('');
     show('screen-role');
@@ -192,73 +187,67 @@ window.joinGame = async function() {
   }
 };
 
-window.selectRole = function(id) {
+window.selectRole = function(key) {
   document.querySelectorAll('.btn-action').forEach(b => b.classList.remove('selected'));
-  document.getElementById(`role-${id}`).classList.add('selected');
-  playerRole = ROLES.find(r => r.id === id).label;
+  document.getElementById(`role-${key}`).classList.add('selected');
+  const role = ROLES.find(r => r.key === key);
+  playerKey = role.key;
+  playerLabel = role.label;
   document.getElementById('btn-confirm-role').disabled = false;
-  log(`Role selected: ${playerRole}`);
+  log(`Role selected: ${playerLabel} (key: ${playerKey})`);
 };
 
 window.confirmRole = async function() {
-  log(`Confirming role: ${playerRole}`);
+  log(`Confirming role: ${playerKey}`);
   try {
     await update(ref(db, `games/${gameCode}/players/${playerId}`), {
-      name: window._playerName, role: playerRole, submitted: false, action: null
+      name: window._playerName,
+      role: playerLabel,
+      roleKey: playerKey,
+      submitted: false,
+      action: null
     });
-    log('Player written to Firebase successfully');
-
-    document.getElementById('lobby-role').textContent = playerRole;
+    log('Written to Firebase OK');
+    document.getElementById('lobby-role').textContent = playerLabel;
     const snap = await get(ref(db, `games/${gameCode}/scenario`));
     const s = snap.val();
     document.getElementById('lobby-bill').textContent = s.title;
     document.getElementById('lobby-desc').textContent = s.description;
     show('screen-lobby');
-
-    // Attach listener after a short delay to ensure write is complete
     setTimeout(() => {
-      log('Attaching Firebase game listener...');
+      log('Attaching listener...');
       listenToGame();
     }, 800);
   } catch(e) {
-    log(`ERROR confirming role: ${e.message}`);
+    log(`ERROR: ${e.message}`);
   }
 };
 
 function listenToGame() {
   onValue(ref(db, `games/${gameCode}`), snap => {
     const state = snap.val();
-    if (!state) { log('Received null state from Firebase'); return; }
-    log(`Firebase update received — phase: ${state.phase}, round: ${state.round}`);
-
-    const phase = state.phase;
-    const round = state.round;
+    if (!state) { log('Null state received'); return; }
+    log(`Update — phase: ${state.phase}, round: ${state.round}`);
     const activeScreen = document.querySelector('.screen.active')?.id;
-
-    if (phase === 'round') {
-      if (round !== currentRound || activeScreen === 'screen-lobby') {
-        log(`Transitioning to action screen for round ${round}`);
-        currentRound = round;
+    if (state.phase === 'round') {
+      if (state.round !== currentRound || activeScreen === 'screen-lobby') {
+        currentRound = state.round;
         showActionScreen(state);
       }
-    } else if (phase === 'between' || phase === 'done') {
-      if (activeScreen === 'screen-action') {
-        log(`Transitioning to result screen`);
-        showResultScreen(state);
-      }
+    } else if ((state.phase === 'between' || state.phase === 'done') && activeScreen === 'screen-action') {
+      showResultScreen(state);
     }
-  }, (error) => {
-    log(`Firebase listener error: ${error.message}`);
-  });
-  log('Listener attached to games/' + gameCode);
+  }, err => log(`Listener error: ${err.message}`));
+  log(`Listener attached to games/${gameCode}`);
 }
 
 function showActionScreen(state) {
   selectedAction = null;
   const bill = state.currentBill;
-      const myPrompt = (state.rolePrompts || {})[safeKey(playerRole)] || { prompt: "Make your decision for this round.", choices: ["Support the bill", "Oppose the bill"] };
-  log(`Showing action screen. Prompt: ${myPrompt.prompt?.substring(0,40)}...`);
-  document.getElementById('action-role').textContent = playerRole;
+  // Look up prompt using the Firebase-safe key
+  const myPrompt = (state.rolePrompts || {})[playerKey] || { prompt: "Make your decision for this round.", choices: ["Support the bill", "Oppose the bill"] };
+  log(`Action screen — prompt key: ${playerKey}, prompt: ${myPrompt.prompt?.substring(0,40)}`);
+  document.getElementById('action-role').textContent = playerLabel;
   document.getElementById('action-round').textContent = state.round;
   document.getElementById('action-bill').textContent = bill.billOption;
   document.getElementById('action-prompt').textContent = myPrompt.prompt;
@@ -274,26 +263,23 @@ window.selectAction = function(el, action) {
   el.classList.add('selected');
   selectedAction = action;
   document.getElementById('btn-submit').disabled = false;
-  log(`Action selected: ${action}`);
 };
 
 window.submitAction = async function() {
   if (!selectedAction) return;
-  log(`Submitting action: ${selectedAction}`);
   try {
     await update(ref(db, `games/${gameCode}/players/${playerId}`), { submitted: true, action: selectedAction });
     document.getElementById('btn-submit').disabled = true;
     document.getElementById('submitted-msg').style.display = 'block';
-    log('Action submitted successfully');
+    log('Action submitted');
   } catch(e) {
-    log(`ERROR submitting action: ${e.message}`);
+    log(`ERROR submitting: ${e.message}`);
   }
 };
 
 function showResultScreen(state) {
   const outcome = state.lastOutcome || {};
   const event = state.lastEvent;
-  log(`Showing result. Passed: ${outcome.passed}, Impact: ${state.totalImpact}`);
   document.getElementById('result-event').style.display = event ? 'block' : 'none';
   if (event) {
     document.getElementById('result-event-title').textContent = '⚡ ' + event.title;
