@@ -139,6 +139,8 @@ const ROLES = [
 
 let db, gameCode, playerId, playerRole, selectedAction = null, currentRound = 0;
 
+function safeKey(str) { return str.replace(/[.#$/[\]]/g, '_'); }
+
 function log(msg) {
   const els = document.querySelectorAll('#debug-log');
   els.forEach(el => { el.innerHTML += `<div>${new Date().toLocaleTimeString()}: ${msg}</div>`; el.scrollTop = el.scrollHeight; });
@@ -254,7 +256,7 @@ function listenToGame() {
 function showActionScreen(state) {
   selectedAction = null;
   const bill = state.currentBill;
-  const myPrompt = (state.rolePrompts || {})[playerRole] || { prompt: "Make your decision for this round.", choices: ["Support the bill", "Oppose the bill"] };
+      const myPrompt = (state.rolePrompts || {})[safeKey(playerRole)] || { prompt: "Make your decision for this round.", choices: ["Support the bill", "Oppose the bill"] };
   log(`Showing action screen. Prompt: ${myPrompt.prompt?.substring(0,40)}...`);
   document.getElementById('action-role').textContent = playerRole;
   document.getElementById('action-round').textContent = state.round;
