@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Legislative Simulation — Host</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #0d1b2a; color: #e0e0e0; min-height: 100vh; }
+  header { background: #1a2940; padding: 16px 32px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #2a4a7f; }
+  header h1 { font-size: 1.4rem; color: #7eb8f7; letter-spacing: 1px; }
+  #game-code-display { font-size: 2rem; font-weight: bold; color: #f0c040; letter-spacing: 4px; }
+  .main { display: grid; grid-template-columns: 1fr 340px; gap: 20px; padding: 20px 32px; }
+  .card { background: #1a2940; border-radius: 12px; padding: 20px; border: 1px solid #2a4a7f; }
+  h2 { font-size: 1rem; color: #7eb8f7; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+  #bill-title { font-size: 1.5rem; font-weight: bold; color: #fff; margin-bottom: 8px; }
+  #bill-desc { color: #b0c4de; line-height: 1.6; font-size: 0.95rem; }
+  .bar-label { display: flex; justify-content: space-between; font-size: 0.8rem; color: #7eb8f7; margin-bottom: 4px; }
+  .bar-bg { background: #0d1b2a; border-radius: 8px; height: 18px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 8px; transition: width 0.8s ease; }
+  #scope-fill { background: linear-gradient(90deg, #2ecc71, #e74c3c); }
+  #impact-fill { background: linear-gradient(90deg, #3498db, #9b59b6); }
+  #round-indicator { display: flex; gap: 10px; margin-bottom: 16px; }
+  .round-dot { width: 28px; height: 28px; border-radius: 50%; background: #0d1b2a; border: 2px solid #2a4a7f; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; color: #7eb8f7; font-weight: bold; }
+  .round-dot.active { background: #2a4a7f; border-color: #7eb8f7; color: #fff; }
+  .round-dot.done { background: #2ecc71; border-color: #27ae60; color: #fff; }
+  #players-list { display: flex; flex-direction: column; gap: 8px; max-height: 280px; overflow-y: auto; }
+  .player-row { display: flex; justify-content: space-between; align-items: center; background: #0d1b2a; border-radius: 8px; padding: 8px 12px; font-size: 0.85rem; }
+  .player-role { color: #f0c040; font-weight: bold; font-size: 0.75rem; }
+  .player-status { font-size: 0.75rem; padding: 2px 8px; border-radius: 10px; background: #2a4a7f; color: #7eb8f7; }
+  .player-status.submitted { background: #27ae60; color: #fff; }
+  #event-card { background: linear-gradient(135deg, #4a1942, #2a0a40); border: 1px solid #9b59b6; }
+  #event-title { font-size: 1.1rem; font-weight: bold; color: #e056fd; margin-bottom: 8px; }
+  #event-desc { font-size: 0.88rem; color: #d0b0e0; line-height: 1.5; }
+  .btn { padding: 10px 24px; border-radius: 8px; border: none; cursor: pointer; font-size: 0.95rem; font-weight: bold; transition: opacity 0.2s; }
+  .btn:hover { opacity: 0.85; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-primary { background: #2a6fc9; color: #fff; }
+  .btn-success { background: #27ae60; color: #fff; }
+  .btn-danger { background: #c0392b; color: #fff; }
+  .btn-row { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+  #setup-screen { position: fixed; inset: 0; background: #0d1b2a; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; z-index: 100; padding: 24px; }
+  #setup-screen h1 { font-size: 2rem; color: #7eb8f7; }
+  #setup-screen p { color: #b0c4de; text-align: center; max-width: 500px; }
+  #setup-form { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 500px; }
+  #setup-form label { color: #7eb8f7; font-size: 0.85rem; }
+  #setup-form select { width: 100%; padding: 10px 16px; border-radius: 8px; border: 1px solid #2a4a7f; background: #1a2940; color: #fff; font-size: 1rem; }
+  .phase-badge { display: inline-block; padding: 3px 10px; border-radius: 10px; font-size: 0.75rem; font-weight: bold; background: #2a4a7f; color: #7eb8f7; margin-bottom: 10px; }
+  #qr-hint { font-size: 0.8rem; color: #7eb8f7; margin-top: 4px; }
+  .scope-labels { display: flex; justify-content: space-between; font-size: 0.7rem; color: #7eb8f7; margin-top: 2px; }
+</style>
+</head>
+<body>
+
+<!-- SETUP SCREEN -->
+<div id="setup-screen">
+  <h1>🏛️ Legislative Simulation</h1>
+  <p>Choose a policy topic to begin. Players will join from their phones using the game code shown on this screen.</p>
+  <div id="setup-form">
+    <label>Select a Policy Topic</label>
+    <select id="topic-select">
+      <option value="healthcare">Healthcare Reform</option>
+      <option value="climate">Climate & Energy Policy</option>
+      <option value="education">Education Funding</option>
+      <option value="immigration">Immigration Reform</option>
+      <option value="guncontrol">Gun Control Legislation</option>
+      <option value="housing">Affordable Housing</option>
+      <option value="taxreform">Tax Reform</option>
+      <option value="infrastructure">Infrastructure Investment</option>
+    </select>
+    <button class="btn btn-primary" onclick="startSetup()" style="margin-top:8px;">🚀 Launch Game Session</button>
+  </div>
+</div>
+
+<!-- MAIN HOST SCREEN -->
+<header>
+  <h1>🏛️ Legislative Simulation — Host Dashboard</h1>
+  <div>
+    <div style="font-size:0.75rem;color:#7eb8f7;">GAME CODE</div>
+    <div id="game-code-display">----</div>
+    <div id="qr-hint">Players join at: <span id="player-url" style="color:#f0c040;"></span></div>
+  </div>
+</header>
+
+<div class="main">
+  <div style="display:flex;flex-direction:column;gap:16px;">
+    <div class="card">
+      <h2>Session Progress</h2>
+      <div id="round-indicator">
+        <div class="round-dot active" id="rd1">1</div>
+        <div class="round-dot" id="rd2">2</div>
+        <div class="round-dot" id="rd3">3</div>
+      </div>
+      <div id="phase-badge" class="phase-badge">Waiting for players...</div>
+    </div>
+    <div class="card">
+      <h2>Current Policy Bill</h2>
+      <div id="bill-title">–</div>
+      <div id="bill-desc" style="margin-top:8px;"></div>
+      <div style="margin-top:16px;">
+        <div class="bar-label"><span>Bill Scope</span><span id="scope-val">–</span></div>
+        <div class="bar-bg"><div class="bar-fill" id="scope-fill" style="width:0%"></div></div>
+        <div class="scope-labels"><span>Incremental</span><span>Sweeping Reform</span></div>
+      </div>
+      <div style="margin-top:12px;">
+        <div class="bar-label"><span>Cumulative Policy Impact</span><span id="impact-val">0</span></div>
+        <div class="bar-bg"><div class="bar-fill" id="impact-fill" style="width:0%"></div></div>
+      </div>
+    </div>
+    <div class="card" id="event-card" style="display:none;">
+      <h2>⚡ Random Event</h2>
+      <div id="event-title"></div>
+      <div id="event-desc"></div>
+    </div>
+    <div class="card" id="outcome-card" style="display:none;">
+      <h2>Round Outcome</h2>
+      <div id="outcome-text"></div>
+    </div>
+    <div class="card">
+      <h2>Host Controls</h2>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="btn-start-round" onclick="startRound()" disabled>▶ Start Round</button>
+        <button class="btn btn-success" id="btn-resolve" onclick="resolveRound()" disabled>✔ Resolve Round</button>
+        <button class="btn btn-danger" onclick="resetGame()">↺ Reset Session</button>
+      </div>
+    </div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:16px;">
+    <div class="card">
+      <h2>Players (<span id="player-count">0</span>)</h2>
+      <div id="players-list"><div style="color:#7eb8f7;font-size:0.85rem;">Waiting for players to join...</div></div>
+    </div>
+    <div class="card">
+      <h2>Incrementalism Meter</h2>
+      <p style="font-size:0.82rem;color:#b0c4de;line-height:1.6;">Smaller bills pass more reliably but move the needle less. Sweeping reforms face amplified opposition and event penalties.</p>
+      <div style="margin-top:12px;font-size:0.8rem;color:#7eb8f7;">
+        <div>🟢 Scope 1–3: High pass rate, low impact</div>
+        <div>🟡 Scope 4–6: Moderate, compromise likely</div>
+        <div>🔴 Scope 7–10: Low pass rate, gutted by events</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, set, get, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const FB_URL = "https://legislative-game-default-rtdb.firebaseio.com";
+
+// ── PRE-SCRIPTED CONTENT ──────────────────────────────────────────────────────
+const SCENARIOS = {
+  healthcare: {
+    title: "The American Health Security Act",
+    description: "Congress is debating how to address the 30 million uninsured Americans. The debate centers on how aggressively to reform the existing insurance market.",
+    rounds: [
+      { billOption: "Expand Medicaid eligibility by 5% in participating states", scope: 2 },
+      { billOption: "Create a public insurance option available in all 50 states", scope: 6 },
+      { billOption: "Universal single-payer healthcare replacing all private insurance", scope: 9 }
+    ],
+    rolePrompts: {
+      "Senator/House Rep": [
+        { prompt: "A modest Medicaid expansion is on the table. It has broad support but critics say it doesn't go far enough. Your constituents are divided.", choices: ["Vote yes — small progress is still progress", "Propose an amendment to include a pilot public option"] },
+        { prompt: "The public option is controversial. Insurance industry lobbyists are pressuring you. Your party leadership wants a yes vote.", choices: ["Vote yes — constituent demand is high", "Negotiate to limit the public option to rural areas only"] },
+        { prompt: "Single-payer is the most ambitious bill of the generation. It will define your legacy — and could end your career.", choices: ["Vote yes — bold reform is needed", "Vote no — support a phased approach instead"] }
+      ],
+      "Interest Group": [
+        { prompt: "A small Medicaid expansion won't hurt your members much. But you want to set a precedent against further expansion.", choices: ["Stay neutral — it's too small to fight", "Lobby against it to prevent a slippery slope"] },
+        { prompt: "The public option directly threatens private insurance profits. Your members are alarmed.", choices: ["Lobby hard against — fund opposition campaigns", "Negotiate for a limited public option with private market protections"] },
+        { prompt: "Single-payer would eliminate private insurance entirely. This is an existential threat.", choices: ["Launch a full media blitz against the bill", "Back a compromise — support a hybrid model instead"] }
+      ],
+      "Executive Branch": [
+        { prompt: "The Medicaid expansion aligns with your health agenda. It's a safe political win.", choices: ["Publicly endorse the bill and push Congress", "Stay quiet — let Congress lead on this one"] },
+        { prompt: "The public option is popular with your base but risky politically. Industry donors are unhappy.", choices: ["Signal strong presidential support", "Signal openness but ask for market protections"] },
+        { prompt: "Single-payer is a lightning rod. Your approval rating could swing dramatically either way.", choices: ["Champion it — make it your signature policy", "Threaten a veto unless a compromise is reached"] }
+      ],
+      "Public Opinion": [
+        { prompt: "Most Americans support expanding Medicaid, especially in rural areas. But awareness of this bill is low.", choices: ["Mobilize grassroots support via town halls", "Express skepticism — demand more ambitious reform"] },
+        { prompt: "Polls show 55% support for a public option. But the term 'government healthcare' polls poorly.", choices: ["Rally public support with personal healthcare stories", "Shift opinion negative — highlight government inefficiency fears"] },
+        { prompt: "Single-payer has passionate supporters and fierce opponents. Public opinion is deeply split by party.", choices: ["Generate massive public pressure in support", "Reflect public fear — amplify concerns about cost and disruption"] }
+      ],
+      "Media Rep": [
+        { prompt: "The Medicaid expansion is a quiet, technical bill. It won't make headlines unless you frame it compellingly.", choices: ["Frame as a compassionate lifeline for the working poor", "Frame as another costly government entitlement program"] },
+        { prompt: "The public option debate is explosive. You can shape how millions of Americans understand this bill.", choices: ["Frame as a necessary check on insurance industry greed", "Frame as a government takeover threatening patient choice"] },
+        { prompt: "Single-payer is the story of the decade. Your coverage will influence the outcome.", choices: ["Run a series on healthcare horror stories to build support", "Highlight economic risks and implementation failures abroad"] }
+      ]
+    }
+  },
+  climate: {
+    title: "The Clean Future Act",
+    description: "Rising temperatures and extreme weather events are forcing Congress to act on climate. The debate is how fast and how far to go in transforming America's energy economy.",
+    rounds: [
+      { billOption: "Extend federal tax credits for solar and wind energy by 5 years", scope: 2 },
+      { billOption: "Mandate 50% renewable electricity by 2035 with federal enforcement", scope: 6 },
+      { billOption: "Ban all new fossil fuel extraction and reach net-zero by 2030", scope: 9 }
+    ],
+    rolePrompts: {
+      "Senator/House Rep": [
+        { prompt: "Tax credits for renewables are popular and bipartisan. Even fossil fuel states see jobs benefits.", choices: ["Vote yes — economic and environmental win", "Amend to add natural gas as a transition fuel"] },
+        { prompt: "A 50% renewable mandate worries coal-state colleagues. Your vote could flip the outcome.", choices: ["Vote yes — the science demands urgency", "Propose extending the deadline to 2040 as a compromise"] },
+        { prompt: "A fossil fuel ban would reshape your state's economy overnight. Labor unions are divided.", choices: ["Vote yes with strong worker transition funding", "Vote no — support a carbon tax approach instead"] }
+      ],
+      "Interest Group": [
+        { prompt: "Renewable tax credits benefit your clean energy members but hurt fossil fuel allies.", choices: ["Support the credits — growth opportunity for green sector", "Oppose — protect fossil fuel members' market share"] },
+        { prompt: "A renewable mandate creates certainty for investors but threatens existing infrastructure.", choices: ["Support with transition funding requirements", "Lobby to weaken enforcement mechanisms"] },
+        { prompt: "A fossil fuel ban would strand trillions in assets. This is the fight of your organization's life.", choices: ["Launch an all-out legal and lobbying campaign against it", "Negotiate for a 15-year phase-out instead of an immediate ban"] }
+      ],
+      "Executive Branch": [
+        { prompt: "Renewable tax credits are a no-brainer. They sailed through last time with bipartisan support.", choices: ["Sign enthusiastically and hold a Rose Garden ceremony", "Sign quietly — save political capital for bigger fights"] },
+        { prompt: "A 50% mandate is ambitious but achievable. Your climate advisors say it's the minimum needed.", choices: ["Champion it as a historic climate commitment", "Ask for a waiver provision for energy-dependent states"] },
+        { prompt: "A fossil fuel ban by 2030 may be scientifically necessary but politically catastrophic.", choices: ["Back it fully — this is a moral imperative", "Threaten a veto — propose a carbon pricing system instead"] }
+      ],
+      "Public Opinion": [
+        { prompt: "74% of Americans support renewable energy incentives. This is one of the least controversial climate policies.", choices: ["Amplify public support — make it a voter issue", "Stay quiet — let it pass without controversy"] },
+        { prompt: "Support for a renewable mandate splits along geographic lines. Rural energy communities feel left behind.", choices: ["Mobilize youth climate activists to demand the mandate", "Shift opinion to focus on job losses in fossil fuel communities"] },
+        { prompt: "A 2030 fossil fuel ban feels urgent to coastal cities but existential to oil-dependent states.", choices: ["Drive a massive climate justice movement in support", "Reflect public anxiety about energy prices and reliability"] }
+      ],
+      "Media Rep": [
+        { prompt: "Tax credit extensions are dry policy. You'll need a hook to make this newsworthy.", choices: ["Profile clean energy job growth in swing states", "Question whether tax credits are corporate welfare"] },
+        { prompt: "A renewable mandate is a visual story — wind farms, solar fields, closing coal plants.", choices: ["Run a 'Future of Energy' series with optimistic framing", "Cover utility rate increases and grid reliability fears"] },
+        { prompt: "A fossil fuel ban is the most dramatic energy story in a generation.", choices: ["Lead with climate scientists and the urgency of the crisis", "Lead with economic disruption and stranded worker stories"] }
+      ]
+    }
+  },
+  education: {
+    title: "The American Education Investment Act",
+    description: "Funding gaps between wealthy and low-income school districts have widened for decades. Congress is considering how much federal intervention is appropriate to equalize educational opportunity.",
+    rounds: [
+      { billOption: "Increase Title I funding for low-income schools by 10%", scope: 2 },
+      { billOption: "Create a federal matching fund to equalize per-pupil spending across districts", scope: 5 },
+      { billOption: "Federalize all K-12 funding and eliminate local property tax as a funding source", scope: 9 }
+    ],
+    rolePrompts: {
+      "Senator/House Rep": [
+        { prompt: "A 10% Title I increase is modest but meaningful. Republicans may support it as targeted aid.", choices: ["Vote yes — straightforward support for vulnerable kids", "Amend to add accountability requirements for schools"] },
+        { prompt: "The equalization fund would redistribute money from wealthy to poor districts. Suburban constituents are upset.", choices: ["Vote yes — equity demands redistribution", "Negotiate to limit redistribution to the bottom 20% of districts"] },
+        { prompt: "Federalizing school funding upends 200 years of local control. This will be challenged in court.", choices: ["Vote yes — local control has perpetuated inequality for too long", "Vote no — support the matching fund approach instead"] }
+      ],
+      "Interest Group": [
+        { prompt: "Teachers unions strongly support Title I increases. Parent groups are cautiously in favor.", choices: ["Lobby aggressively in support", "Support but push for teacher pay requirements attached to the funds"] },
+        { prompt: "The equalization fund threatens wealthy suburban districts that fund their own schools generously.", choices: ["Lobby against — protect local funding autonomy", "Support with a hold-harmless provision for top-funded districts"] },
+        { prompt: "Full federalization would centralize curriculum and staffing decisions. Teachers unions are split.", choices: ["Oppose — this eliminates local collective bargaining power", "Support if federal standards include strong union protections"] }
+      ],
+      "Executive Branch": [
+        { prompt: "Title I increases poll extremely well. There's no political downside to this one.", choices: ["Endorse loudly and campaign on it", "Sign it but focus messaging on bigger education goals"] },
+        { prompt: "The equalization fund is politically risky in suburban swing districts you need.", choices: ["Champion equity — make it the centerpiece of your education agenda", "Ask Congress to add transition funding to soften the blow for wealthy districts"] },
+        { prompt: "Full federalization is constitutionally murky and politically explosive.", choices: ["Back it as a generational reform", "Threaten a veto — push the equalization fund as a better path"] }
+      ],
+      "Public Opinion": [
+        { prompt: "Parents across the country support more funding for struggling schools in the abstract.", choices: ["Mobilize low-income parent groups to demand the increase", "Raise concerns about federal strings attached to local schools"] },
+        { prompt: "Wealthy suburban parents are organizing against equalization. Their turnout is high.", choices: ["Counter with equity messaging from students in underfunded schools", "Reflect suburban parent anxiety about losing district resources"] },
+        { prompt: "Full federalization triggers deep fears about government overreach in education.", choices: ["Champion it as the only real solution to inequality", "Amplify parental rights concerns and anti-federal sentiment"] }
+      ],
+      "Media Rep": [
+        { prompt: "A 10% Title I bump is inside baseball. You need a compelling frame.", choices: ["Profile a single underfunded school to personalize the stakes", "Question whether more money actually improves outcomes"] },
+        { prompt: "The equalization debate is a rich vs. poor schools story. High drama, clear conflict.", choices: ["Contrast wealthy and poor district facilities side-by-side", "Focus on affluent parents' anger and legal challenge threats"] },
+        { prompt: "Federalizing education is a federalism story, a civil rights story, and a parental rights story all at once.", choices: ["Frame as the civil rights issue of our time", "Lead with constitutional concerns and local control advocates"] }
+      ]
+    }
+  },
+  immigration: {
+    title: "The Border Security & Immigration Reform Act",
+    description: "Immigration has strained federal resources and created a backlog of millions of cases. Congress faces pressure to act on both border security and the status of long-term undocumented residents.",
+    rounds: [
+      { billOption: "Fund 500 additional immigration judges to clear the case backlog", scope: 2 },
+      { billOption: "Create a 10-year pathway to legal status for undocumented residents with no criminal record", scope: 6 },
+      { billOption: "Comprehensive reform: pathway to citizenship, border wall completion, and visa system overhaul", scope: 9 }
+    ],
+    rolePrompts: {
+      "Senator/House Rep": [
+        { prompt: "More immigration judges is a technocratic fix with rare bipartisan support. Even restrictionists want faster deportations.", choices: ["Vote yes — reducing the backlog helps everyone", "Amend to require stricter deportation timelines"] },
+        { prompt: "A legal status pathway is politically charged but broadly supported by the public. Your district is competitive.", choices: ["Vote yes — it's humane and practical", "Negotiate to add mandatory E-Verify for employers as a trade"] },
+        { prompt: "Comprehensive reform has failed three times in 20 years. Do you try again?", choices: ["Vote yes — this is the only real solution", "Vote no — pass the pieces separately instead"] }
+      ],
+      "Interest Group": [
+        { prompt: "Faster case processing helps agricultural employers who rely on undocumented labor gain legal clarity.", choices: ["Support — faster adjudication benefits our members", "Oppose — faster courts mean faster deportations of workers"] },
+        { prompt: "A legal status pathway would allow undocumented workers to negotiate for better wages and conditions.", choices: ["Strongly support — this empowers vulnerable workers", "Oppose — it could displace some citizen workers"] },
+        { prompt: "Comprehensive reform includes increased border enforcement that could criminalize migrants your group serves.", choices: ["Support the pathway but oppose the enforcement provisions loudly", "Back the whole package — imperfect reform beats no reform"] }
+      ],
+      "Executive Branch": [
+        { prompt: "Immigration court funding is administrative and uncontroversial. Easy win.", choices: ["Sign it and highlight efficiency gains", "Sign but call on Congress to go further"] },
+        { prompt: "A legal status pathway energizes your base but inflames opponents. Midterms are approaching.", choices: ["Champion it as the moral and practical choice", "Support quietly — avoid making it the centerpiece of your message"] },
+        { prompt: "Comprehensive reform would be the biggest immigration legislation in decades. It could define your presidency.", choices: ["Go all in — make it your signature legislative push", "Threaten a veto unless border security provisions are strengthened"] }
+      ],
+      "Public Opinion": [
+        { prompt: "Most Americans across party lines think the immigration court system is broken and needs more resources.", choices: ["Mobilize to demand faster, fairer processing", "Raise fears that more judges means more immigrants admitted"] },
+        { prompt: "A legal status pathway polls at 60%+ support nationally but is deeply unpopular in certain swing states.", choices: ["Amplify stories of long-term residents facing deportation", "Reflect concerns about rewarding illegal entry"] },
+        { prompt: "Comprehensive reform is a Rorschach test — everyone reads it through their own values.", choices: ["Drive a humanitarian framing emphasizing family unity", "Amplify border security concerns and rule-of-law arguments"] }
+      ],
+      "Media Rep": [
+        { prompt: "Immigration court funding is dry policy. How do you make people care?", choices: ["Profile families stuck in limbo for years awaiting hearings", "Question whether the backlog is caused by abuse of the asylum system"] },
+        { prompt: "A legal status pathway is a vivid human story with millions of faces.", choices: ["Run profiles of undocumented residents who built lives here", "Focus on critics who say it rewards lawbreaking and invites more illegal immigration"] },
+        { prompt: "Comprehensive reform has drama, conflict, winners, and losers. This is the biggest immigration story in years.", choices: ["Frame as a once-in-a-generation chance for a humane solution", "Lead with enforcement skeptics and past reform failures"] }
+      ]
+    }
+  },
+  guncontrol: {
+    title: "The Public Safety & Firearms Act",
+    description: "A series of high-profile mass shootings has renewed pressure on Congress to act on gun violence. Lawmakers are debating measures that range from narrow technical fixes to sweeping restrictions.",
+    rounds: [
+      { billOption: "Close the gun show loophole by requiring background checks on all private sales", scope: 3 },
+      { billOption: "Institute a national 7-day waiting period for all firearm purchases", scope: 6 },
+      { billOption: "Ban all semi-automatic weapons and institute a mandatory federal buyback program", scope: 9 }
+    ],
+    rolePrompts: {
+      "Senator/House Rep": [
+        { prompt: "Background check expansion polls at 90% support. Even many gun owners agree. But the NRA is scoring this vote.", choices: ["Vote yes — public safety and political safety align here", "Vote no — frame it as a slippery slope to registration"] },
+        { prompt: "A waiting period could prevent impulsive violence but angers gun rights advocates who call it an infringement.", choices: ["Vote yes — the data on suicide prevention alone justifies it", "Propose limiting the waiting period to first-time buyers only"] },
+        { prompt: "A semi-auto ban and buyback is the most aggressive gun legislation in American history.", choices: ["Vote yes — the human cost demands bold action", "Vote no — support waiting periods and red flag laws instead"] }
+      ],
+      "Interest Group": [
+        { prompt: "The background check bill is popular. Open opposition could damage your organization's public image.", choices: ["Stay neutral — pick your battles", "Oppose loudly — any new requirement sets a dangerous precedent"] },
+        { prompt: "A waiting period has limited practical impact on most gun owners but signals a shift in political norms.", choices: ["Oppose — this is government interference in lawful purchases", "Accept it as a compromise to avoid worse legislation"] },
+        { prompt: "A semi-auto ban would effectively eliminate the most popular rifles and handguns in America.", choices: ["Launch a full legal and political war against this bill", "Propose a grandfather clause and negotiate on new sales only"] }
+      ],
+      "Executive Branch": [
+        { prompt: "Background check expansion is the kind of common-sense reform you campaigned on.", choices: ["Endorse strongly and publicly", "Sign but call for more — frame as a first step"] },
+        { prompt: "A waiting period is modest but meaningful. Survivor groups are pushing you hard.", choices: ["Champion it as a life-saving measure", "Support quietly to avoid energizing gun rights voters"] },
+        { prompt: "A semi-auto ban is constitutionally uncertain and politically explosive.", choices: ["Back it fully — make it your gun safety legacy", "Threaten a veto — push red flag laws and mental health funding instead"] }
+      ],
+      "Public Opinion": [
+        { prompt: "After another mass shooting, public demand for action is intense but often short-lived.", choices: ["Sustain momentum — organize rallies and survivor testimonials", "Channel anger toward a narrow, passable fix"] },
+        { prompt: "A waiting period has strong support among women's groups concerned about domestic violence.", choices: ["Mobilize domestic violence survivors as key messengers", "Reflect concerns from rural gun owners who fear delays during emergencies"] },
+        { prompt: "A semi-auto ban galvanizes both sides. Turnout elections could swing dramatically.", choices: ["Drive massive youth-led support for bold action", "Amplify gun owner fears about confiscation and constitutional rights"] }
+      ],
+      "Media Rep": [
+        { prompt: "Background check legislation is technical. You need a hook.", choices: ["Profile a shooting that a background check would have prevented", "Highlight cases where the system flagged law-abiding citizens unfairly"] },
+        { prompt: "A waiting period is a human interest story about impulse and tragedy.", choices: ["Run stories of lives saved by cooling-off periods", "Cover gun store owners and buyers frustrated by government delays"] },
+        { prompt: "A semi-auto ban is the biggest Second Amendment story since Heller.", choices: ["Lead with mass shooting survivors demanding the ban", "Lead with constitutional scholars debating the bill's legality"] }
+      ]
+    }
+  },
+  housing: {
+    title: "The Affordable Homes for America Act",
+    description: "Home prices have surged beyond reach for millions of working Americans. Congress is debating federal intervention in the housing market, from incentives to developers to large-scale public housing construction.",
+    rounds: [
+      { billOption: "Offer federal tax credits to developers who build affordable rental units", scope: 2 },
+      { billOption: "Create a $50 billion federal grant program to fund mixed-income housing in high-cost cities", scope: 5 },
+      { billOption: "Launch a federal public housing construction program to build 2 million units in 5 years", scope: 9 }
+    ],
+    rolePrompts: {
+      "Senator/House Rep": [
+        { prompt: "Developer tax credits are a market-friendly approach. They've worked before but critics say they're too slow.", choices: ["Vote yes — incentives over mandates", "Amend to include affordability requirements lasting 30+ years"] },
+        { prompt: "A $50 billion housing grant is large but targeted. NIMBYism in your district is a real concern.", choices: ["Vote yes — the housing crisis demands investment", "Negotiate to give cities flexibility on how they use the funds"] },
+        { prompt: "2 million public housing units would be the largest government building program since the Interstate Highway System.", choices: ["Vote yes — private markets have failed on housing", "Vote no — support the grant program as a better approach"] }
+      ],
+      "Interest Group": [
+        { prompt: "Tax credits help your developer members build more units and make money doing it.", choices: ["Strongly support — this is good for our members and the market", "Support but push to expand the credit amount"] },
+        { prompt: "Federal grants could flood cities with affordable units, affecting market-rate rents and property values.", choices: ["Oppose — government intervention distorts the market", "Support if private developers can co-invest in the developments"] },
+        { prompt: "A government housing program at this scale would compete directly with private landlords and developers.", choices: ["Launch a full opposition campaign", "Propose a public-private partnership model instead"] }
+      ],
+      "Executive Branch": [
+        { prompt: "Tax credits for affordable housing are popular, bipartisan, and easy to sign.", choices: ["Sign enthusiastically", "Sign and announce a broader housing task force"] },
+        { prompt: "A $50 billion program tests your commitment to housing as a federal priority.", choices: ["Champion it as a cornerstone of your domestic agenda", "Support it but ask for phased funding to limit deficit impact"] },
+        { prompt: "A federal housing construction program is the most ambitious domestic policy in decades.", choices: ["Make it your signature domestic legacy", "Threaten a veto unless it includes private sector partnerships"] }
+      ],
+      "Public Opinion": [
+        { prompt: "Renters in high-cost cities are desperate. But homeowners worry about neighborhood change.", choices: ["Organize renters and housing advocates to demand action", "Raise homeowner concerns about property values and neighborhood character"] },
+        { prompt: "A $50 billion program sounds large but polls well when framed around working families.", choices: ["Frame it around teachers, nurses, and firefighters who can't afford to live where they work", "Highlight concerns about federal spending and local autonomy"] },
+        { prompt: "Public housing has a complicated legacy. Some see it as the solution; others as the problem.", choices: ["Champion it as a human right — housing for all", "Reflect public skepticism based on past public housing failures"] }
+      ],
+      "Media Rep": [
+        { prompt: "Developer tax credits are dry. You need a story with a face.", choices: ["Profile a working family priced out of every apartment they apply for", "Investigate whether past tax credits actually produced affordable units"] },
+        { prompt: "A $50 billion housing bill is a big number. How you frame it shapes public perception.", choices: ["Focus on the number of families housed and neighborhoods revitalized", "Focus on the cost per unit and question government efficiency"] },
+        { prompt: "A federal housing construction program evokes both the New Deal and failed 1970s projects.", choices: ["Frame it as a bold New Deal-era solution to a modern crisis", "Revisit cautionary tales from failed public housing projects of the past"] }
+      ]
+    }
+  },
+  taxreform: {
+    title: "The American Tax Fairness Act",
+    description: "Growing wealth inequality and a complex tax code have renewed calls for reform. Congress is debating changes ranging from closing specific loopholes to a fundamental restructuring of how income and wealth are taxed.",
+    rounds: [
+      { billOption: "Close the carried interest loophole used by hedge fund managers", scope: 2 },
+      { billOption: "Raise the top marginal income tax rate from 37% to 52% on income over $1 million", scope: 6 },
+      { billOption: "Institute a 2% annual wealth tax on all assets over $50 million", scope: 9 }
+    ],
+    rolePrompts: {
+      "Senator/House Rep": [
+        { prompt: "Closing the carried interest loophole has wide public support and even some Republican backers — but Wall Street donors are furious.", choices: ["Vote yes — fairness over donor pressure", "Vote no — frame as protecting investment and job creation"] },
+        { prompt: "A 52% top rate resurrects old arguments about whether high taxes hurt economic growth.", choices: ["Vote yes — the wealthy can afford to pay more", "Propose a smaller increase to 44% as a compromise"] },
+        { prompt: "A wealth tax is legally untested and fiercely opposed by the finance industry.", choices: ["Vote yes — it's the only way to address dynastic wealth", "Vote no — support income tax increases as a safer alternative"] }
+      ],
+      "Interest Group": [
+        { prompt: "The carried interest loophole benefits hedge funds and private equity directly. This is a direct attack on your members.", choices: ["Oppose loudly — fund political ads against the bill", "Accept it quietly — it's politically indefensible to fight this publicly"] },
+        { prompt: "A higher top marginal rate would affect business owners as well as Wall Street.", choices: ["Lobby hard against — frame as a small business killer", "Negotiate for a small business carve-out above $500k"] },
+        { prompt: "A wealth tax would affect the largest donors to your organization and to Congress.", choices: ["Oppose with every resource available — this is existential", "Propose a one-time windfall tax instead as an alternative"] }
+      ],
+      "Executive Branch": [
+        { prompt: "Closing the carried interest loophole is a populist win that plays well in swing states.", choices: ["Endorse publicly and make it part of your economic message", "Support quietly — avoid triggering a donor backlash before midterms"] },
+        { prompt: "A 52% top rate will dominate news coverage. Markets may react negatively.", choices: ["Champion it as restoring fairness to the tax code", "Ask for a phase-in over 5 years to reduce market shock"] },
+        { prompt: "A wealth tax faces likely constitutional challenges. Your legal team is divided.", choices: ["Back it fully and prepare to defend it in court", "Threaten a veto — push for a higher capital gains tax instead"] }
+      ],
+      "Public Opinion": [
+        { prompt: "Most Americans have never heard of carried interest but react strongly when it's explained.", choices: ["Run a public education campaign — 'hedge fund managers pay lower rates than nurses'", "Raise concerns about capital flight and investment slowdown"] },
+        { prompt: "Polling on a millionaire tax rate of 52% shows 58% support, but business groups are running ads against it.", choices: ["Amplify the majority view — make it a kitchen table issue", "Reflect small business owner fears about being lumped in with billionaires"] },
+        { prompt: "A wealth tax has near-universal support in polling — but also near-universal opposition from wealthy donors.", choices: ["Drive a grassroots campaign framed around generational fairness", "Amplify concerns about government intrusion into private assets"] }
+      ],
+      "Media Rep": [
+        { prompt: "The carried interest story is complex. Simplification is key.", choices: ["Explain it plainly: 'Why does a billionaire investor pay a lower tax rate than you?'", "Cover the economic argument that capital gains taxes fund investment and job growth"] },
+        { prompt: "A 52% top marginal rate is a number that triggers strong reactions across the political spectrum.", choices: ["Profile middle-class families and what the revenue could fund", "Interview economists skeptical of high marginal rates on growth"] },
+        { prompt: "A wealth tax has never existed at the federal level. This is historic — and contested.", choices: ["Frame as a transformational shift in American economic policy", "Lead with constitutional scholars who say it won't survive the Supreme Court"] }
+      ]
+    }
+  },
+  infrastructure: {
+    title: "The Rebuild America Infrastructure Act",
+    description: "America's infrastructure — roads, bridges, broadband, water systems — has received a D+ rating from engineers. Congress is debating how much to spend and who should pay for it.",
+    rounds: [
+      { billOption: "Allocate $10 billion in grants for states to repair structurally deficient bridges", scope: 2 },
+      { billOption: "Create a $250 billion federal infrastructure bank funding roads, rail, water, and broadband", scope: 5 },
+      { billOption: "A $2 trillion Green New Infrastructure Program rebuilding all systems with climate resilience standards", scope: 9 }
+    ],
+    rolePrompts: {
+      "Senator/House Rep": [
+        { prompt: "Bridge repair funding is the safest bipartisan vote you'll take this session. Construction unions love it. Republicans can claim fiscal responsibility by limiting scope.", choices: ["Vote yes — easy win for your district", "Amend to require Buy American steel provisions"] },
+        { prompt: "An infrastructure bank is creative financing but unfamiliar to voters. Business community is broadly supportive.", choices: ["Vote yes — this is smart, sustainable investment", "Propose sunsetting the bank after 10 years to limit government growth"] },
+        { prompt: "A $2 trillion program with climate standards is the Green New Deal by another name to critics.", choices: ["Vote yes — climate resilience is infrastructure", "Vote no — support the infrastructure bank approach instead"] }
+      ],
+      "Interest Group": [
+        { prompt: "Construction unions, steel workers, and trucking associations all want this. It's a jobs bill.", choices: ["Strongly support — maximum jobs for members", "Support but push for stronger prevailing wage requirements"] },
+        { prompt: "An infrastructure bank could unlock private investment alongside public funds.", choices: ["Support — public-private partnerships are our preferred model", "Oppose — public banks crowd out private capital"] },
+        { prompt: "Green climate standards on infrastructure projects increase costs and add regulatory burden.", choices: ["Oppose the climate provisions — support traditional infrastructure only", "Support if climate standards are phased in over 10 years"] }
+      ],
+      "Executive Branch": [
+        { prompt: "Bridge repair is the kind of tangible, local win that plays well in every congressional district.", choices: ["Hold a ribbon-cutting tour of dangerous bridges — make it visual", "Sign quietly and move to bigger priorities"] },
+        { prompt: "An infrastructure bank could be a legacy institution — like the New Deal programs that lasted decades.", choices: ["Champion it as a generational investment", "Ask for it to be attached to a deficit-reduction package"] },
+        { prompt: "A $2 trillion climate-resilient infrastructure plan is politically exciting but economically daunting.", choices: ["Make it the centerpiece of your second-term agenda", "Threaten a veto unless the price tag is reduced to $800 billion"] }
+      ],
+      "Public Opinion": [
+        { prompt: "Every American has driven over a pothole or waited through a train delay. Infrastructure is universally relatable.", choices: ["Mobilize around local examples — broken bridges in every district", "Focus on fiscal responsibility — question whether grants are spent efficiently"] },
+        { prompt: "An infrastructure bank sounds technical. The jobs argument is the winning frame.", choices: ["Campaign on good-paying union jobs in every state", "Raise concerns about government-backed loans and taxpayer risk"] },
+        { prompt: "A $2 trillion program with climate standards excites progressives but alienates moderates and rural voters.", choices: ["Drive enthusiasm among young climate voters", "Reflect sticker shock — focus on cost and government overreach concerns"] }
+      ],
+      "Media Rep": [
+        { prompt: "Bridge grants are local stories. National coverage requires a compelling national angle.", choices: ["Map every structurally deficient bridge in America — make it visual", "Investigate how past infrastructure grants were misspent"] },
+        { prompt: "An infrastructure bank is a big idea. You need to make it tangible.", choices: ["Show what $250 billion would build — jobs, broadband, clean water", "Interview economists skeptical of government lending programs"] },
+        { prompt: "A $2 trillion infrastructure bill is either the boldest investment in a century or a budget-busting boondoggle.", choices: ["Frame as America's moment to rebuild and lead on climate", "Lead with price tag sticker shock and inflation concerns"] }
+      ]
+    }
+  }
+};
+
+const EVENTS = [
+  { title: "Midterm Election Approaching", description: "With midterms just months away, vulnerable legislators are retreating to safe positions. Ambitious bills lose co-sponsors overnight.", penalty_low: 0, penalty_high: 3 },
+  { title: "Economic Recession Fears", description: "New GDP data shows two consecutive quarters of contraction. Fiscal hawks demand spending cuts, making any new program politically toxic.", penalty_low: 1, penalty_high: 3 },
+  { title: "Presidential Scandal", description: "A White House controversy dominates the news cycle, draining political capital from the President's legislative agenda.", penalty_low: 0, penalty_high: 2 },
+  { title: "Natural Disaster", description: "A devastating hurricane strikes the Gulf Coast, consuming Congressional attention and emergency appropriations. Legislative bandwidth collapses.", penalty_low: 1, penalty_high: 2 },
+  { title: "Focusing Event: National Tragedy", description: "A high-profile tragedy directly related to the policy area shocks the nation. Public pressure surges — but so does partisan blame.", penalty_low: -1, penalty_high: 1 },
+  { title: "Government Shutdown Threat", description: "Appropriations negotiations break down. Leadership pulls floor time from all other legislation to focus on keeping the government open.", penalty_low: 1, penalty_high: 3 },
+  { title: "Supreme Court Ruling", description: "The Supreme Court issues a ruling that complicates the constitutional basis for the bill, triggering a wave of legal uncertainty and opposition.", penalty_low: 0, penalty_high: 3 },
+  { title: "Media Backlash", description: "A series of critical investigative pieces reframes the bill as special interest giveaway. Public approval drops sharply ahead of the vote.", penalty_low: 0, penalty_high: 2 },
+  { title: "Bipartisan Momentum", description: "An unexpected endorsement from across the aisle generates positive press and softens opposition. A window of opportunity opens.", penalty_low: -2, penalty_high: 0 },
+  { title: "Grassroots Mobilization", description: "A surge of constituent calls, town halls, and protests puts pressure on wavering legislators. The political cost of a 'no' vote rises.", penalty_low: -1, penalty_high: 0 }
+];
+
+// ── GAME STATE ────────────────────────────────────────────────────────────────
+let db, gameCode, currentRound = 0, totalImpact = 0, gameState = {}, scenario;
+
+function genCode() { return Math.random().toString(36).substring(2,7).toUpperCase(); }
+
+window.startSetup = async function() {
+  const topic = document.getElementById('topic-select').value;
+  scenario = SCENARIOS[topic];
+
+  const app = initializeApp({ databaseURL: FB_URL }, 'host');
+  db = getDatabase(app);
+  gameCode = genCode();
+
+  await set(ref(db, `games/${gameCode}`), {
+    code: gameCode, phase: 'lobby', round: 0, totalImpact: 0,
+    scenario: { title: scenario.title, description: scenario.description, rounds: scenario.rounds },
+    players: {}, roundData: {}
+  });
+
+  document.getElementById('setup-screen').style.display = 'none';
+  document.getElementById('game-code-display').textContent = gameCode;
+  const playerUrl = window.location.href.replace('host.html','player.html');
+  document.getElementById('player-url').textContent = playerUrl;
+
+  document.getElementById('bill-title').textContent = scenario.title;
+  document.getElementById('bill-desc').textContent = scenario.description;
+  setupListeners();
+  document.getElementById('btn-start-round').disabled = false;
+};
+
+function setupListeners() {
+  onValue(ref(db, `games/${gameCode}/players`), snap => {
+    const players = snap.val() || {};
+    const count = Object.keys(players).length;
+    document.getElementById('player-count').textContent = count;
+    const list = document.getElementById('players-list');
+    if (count === 0) { list.innerHTML = '<div style="color:#7eb8f7;font-size:0.85rem;">Waiting for players to join...</div>'; return; }
+    list.innerHTML = Object.values(players).map(p => `
+      <div class="player-row">
+        <div><div>${p.name}</div><div class="player-role">${p.role}</div></div>
+        <div class="player-status ${p.submitted ? 'submitted':''}">${p.submitted ? '✔ Submitted':'Waiting'}</div>
+      </div>`).join('');
+  });
+  onValue(ref(db, `games/${gameCode}`), snap => { gameState = snap.val() || {}; });
+}
+
+window.startRound = async function() {
+  currentRound++;
+  if (currentRound > 3) { alert('All 3 rounds complete! Click Reset to start a new session.'); return; }
+
+  for (let i = 1; i <= 3; i++)
+    document.getElementById(`rd${i}`).className = 'round-dot' + (i < currentRound ? ' done' : i === currentRound ? ' active' : '');
+
+  document.getElementById('event-card').style.display = 'none';
+  document.getElementById('outcome-card').style.display = 'none';
+
+  const roundInfo = scenario.rounds[currentRound - 1];
+  const roundIdx = currentRound - 1;
+
+  // Build role prompts for this round
+  const prompts = {};
+  for (const [role, arr] of Object.entries(scenario.rolePrompts))
+    prompts[role] = arr[roundIdx];
+
+  const players = gameState.players || {};
+  const updates = {};
+  Object.keys(players).forEach(pid => { updates[`games/${gameCode}/players/${pid}/submitted`] = false; updates[`games/${gameCode}/players/${pid}/action`] = null; });
+  updates[`games/${gameCode}/phase`] = 'round';
+  updates[`games/${gameCode}/round`] = currentRound;
+  updates[`games/${gameCode}/currentBill`] = roundInfo;
+  updates[`games/${gameCode}/rolePrompts`] = prompts;
+  await update(ref(db), updates);
+
+  document.getElementById('scope-fill').style.width = (roundInfo.scope / 10 * 100) + '%';
+  document.getElementById('scope-val').textContent = `${roundInfo.scope}/10`;
+  document.getElementById('bill-title').textContent = `Round ${currentRound}: ${roundInfo.billOption}`;
+  document.getElementById('phase-badge').textContent = `Round ${currentRound} — Collecting Actions`;
+  document.getElementById('btn-start-round').disabled = true;
+  document.getElementById('btn-resolve').disabled = false;
+};
+
+window.resolveRound = async function() {
+  document.getElementById('phase-badge').textContent = `Round ${currentRound} — Resolving...`;
+  const snap = await get(ref(db, `games/${gameCode}`));
+  const state = snap.val();
+  const bill = state.currentBill;
+  const players = Object.values(state.players || {});
+
+  // Count supportive vs opposing actions
+  const supportKeywords = ['support','yes','endorse','champion','mobilize','frame as necessary','profile','strongly support','back','positive','expand','pass'];
+  let supportCount = 0, opposeCount = 0;
+  players.forEach(p => {
+    const a = (p.action || '').toLowerCase();
+    if (supportKeywords.some(k => a.includes(k))) supportCount++;
+    else opposeCount++;
+  });
+
+  // Pick random event
+  const event = EVENTS[Math.floor(Math.random() * EVENTS.length)];
+  const penalty = bill.scope > 5
+    ? event.penalty_high
+    : bill.scope > 3 ? Math.round((event.penalty_low + event.penalty_high) / 2) : event.penalty_low;
+
+  // Pass probability: base = (11 - scope) / 10, modified by support ratio and penalty
+  const total = players.length || 1;
+  const supportRatio = supportCount / total;
+  const baseProbability = (11 - bill.scope) / 10;
+  const adjustedProbability = baseProbability + (supportRatio - 0.5) * 0.3 - penalty * 0.08;
+  const passed = Math.random() < Math.max(0.05, Math.min(0.95, adjustedProbability));
+
+  // Impact: incremental bills gain reliably less but consistently; big bills gain a lot if they pass
+  const baseImpact = passed ? Math.max(1, Math.round((11 - bill.scope) * 1.5 - penalty)) : 0;
+  const impactGained = Math.min(10, Math.max(0, baseImpact));
+  totalImpact += impactGained;
+
+  // Generate narrative summary
+  const actionSummary = players.map(p => `${p.name} (${p.role}) chose to: ${p.action || 'take no action'}`).join('; ');
+  const summary = generateNarrative(bill, passed, impactGained, event, penalty, supportCount, opposeCount, actionSummary, totalImpact);
+
+  document.getElementById('impact-fill').style.width = Math.min(100, (totalImpact / 30) * 100) + '%';
+  document.getElementById('impact-val').textContent = totalImpact;
+  document.getElementById('event-card').style.display = 'block';
+  document.getElementById('event-title').textContent = `⚡ ${event.title}`;
+  document.getElementById('event-desc').textContent = event.description + (penalty > 0 ? ` This reduced the bill's chances significantly.` : penalty < 0 ? ` This actually boosted support for the bill.` : ``);
+  document.getElementById('outcome-card').style.display = 'block';
+  document.getElementById('outcome-text').textContent = summary;
+
+  const updates = {};
+  updates[`games/${gameCode}/phase`] = currentRound < 3 ? 'between' : 'done';
+  updates[`games/${gameCode}/totalImpact`] = totalImpact;
+  updates[`games/${gameCode}/lastEvent`] = { title: event.title, description: event.description, penalty };
+  updates[`games/${gameCode}/lastOutcome`] = { passed, impactGained, summary };
+  await update(ref(db), updates);
+
+  document.getElementById('phase-badge').textContent = passed ? `✅ Round ${currentRound} — Bill Passed!` : `❌ Round ${currentRound} — Bill Failed`;
+  document.getElementById('btn-resolve').disabled = true;
+  if (currentRound < 3) document.getElementById('btn-start-round').disabled = false;
+  else document.getElementById('phase-badge').textContent = '🏁 Simulation Complete!';
+};
+
+function generateNarrative(bill, passed, impact, event, penalty, support, oppose, actions, totalImpact) {
+  const scope = bill.scope;
+  const scopeLabel = scope <= 3 ? 'incremental' : scope <= 6 ? 'moderate' : 'sweeping';
+  const eventEffect = penalty > 1 ? `The ${event.title.toLowerCase()} significantly disrupted the legislative process, costing critical votes.`
+    : penalty > 0 ? `The ${event.title.toLowerCase()} created headwinds that complicated passage.`
+    : penalty < 0 ? `Surprisingly, the ${event.title.toLowerCase()} generated momentum that helped the bill.`
+    : `The ${event.title.toLowerCase()} had minimal effect on the outcome.`;
+
+  if (passed) {
+    const impactNote = scope <= 3
+      ? `Because this was an ${scopeLabel} measure, it passed with relatively little opposition — but its policy impact is modest (${impact} points). This illustrates how incrementalism builds progress reliably but slowly.`
+      : scope <= 6
+      ? `This ${scopeLabel} bill survived political headwinds with ${support} players in support and ${oppose} in opposition. It gained ${impact} impact points, but required compromise to cross the finish line.`
+      : `Despite being a ${scopeLabel} reform that faced enormous resistance, the bill passed — gaining ${impact} impact points. However, the high opposition and event penalty suggest this outcome may be fragile and subject to reversal.`;
+    return `The bill passed. ${eventEffect} ${impactNote} Cumulative policy impact is now ${totalImpact}/30.`;
+  } else {
+    const failNote = scope <= 3
+      ? `Even this ${scopeLabel} measure couldn't overcome the combination of opposition (${oppose} against) and the event's disruption. This is a reminder that even small bills require political conditions to align.`
+      : scope <= 6
+      ? `This ${scopeLabel} reform fell short with ${support} supporters vs. ${oppose} opponents. The ${event.title.toLowerCase()} made passage impossible. A smaller, more targeted approach may have fared better.`
+      : `This ambitious ${scopeLabel} reform collapsed under the weight of opposition and circumstance. With ${oppose} players opposing and the ${event.title.toLowerCase()} intervening, the bill never had a path. This illustrates the core challenge of large-scale reform: more moving parts means more failure points.`;
+    return `The bill failed. ${eventEffect} ${failNote} Cumulative policy impact remains at ${totalImpact}/30.`;
+  }
+}
+
+window.resetGame = function() { if (confirm('Reset and start a new session?')) location.reload(); };
+</script>
+</body>
+</html>
