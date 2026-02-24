@@ -5,152 +5,191 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Legislative Sim — Player</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Segoe UI', sans-serif; background: #0d1b2a; color: #e0e0e0; min-height: 100vh; }
-  .screen { display: none; padding: 24px 20px; max-width: 480px; margin: 0 auto; }
-  .screen.active { display: block; }
-  h1 { font-size: 1.4rem; color: #7eb8f7; margin-bottom: 8px; }
-  p { color: #b0c4de; line-height: 1.5; font-size: 0.92rem; }
-  input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #2a4a7f; background: #1a2940; color: #fff; font-size: 1rem; margin-top: 8px; }
-  .btn { display: block; width: 100%; padding: 14px; border-radius: 10px; border: none; cursor: pointer; font-size: 1rem; font-weight: bold; margin-top: 12px; transition: opacity 0.2s; }
-  .btn:hover { opacity: 0.85; }
-  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-  .btn-primary { background: #2a6fc9; color: #fff; }
-  .btn-action { background: #1a2940; color: #e0e0e0; border: 2px solid #2a4a7f; text-align: left; padding: 14px 16px; line-height: 1.4; margin-top: 10px; }
-  .btn-action.selected { border-color: #7eb8f7; background: #1e3a5f; color: #fff; }
-  .btn-action.selected::before { content: "✔ "; color: #7eb8f7; }
-  .card { background: #1a2940; border-radius: 12px; padding: 18px; border: 1px solid #2a4a7f; margin-bottom: 14px; }
-  .role-badge { display: inline-block; padding: 4px 12px; border-radius: 10px; background: #2a4a7f; color: #f0c040; font-weight: bold; font-size: 0.85rem; margin-bottom: 10px; }
-  .event-card { background: linear-gradient(135deg, #4a1942, #2a0a40); border: 1px solid #9b59b6; border-radius: 12px; padding: 18px; margin-bottom: 14px; }
-  .event-card h3 { color: #e056fd; margin-bottom: 8px; }
-  .status-dot { width: 10px; height: 10px; border-radius: 50%; background: #f0c040; display: inline-block; margin-right: 6px; animation: pulse 1.5s infinite; }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-  .outcome-pass { color: #2ecc71; font-weight: bold; font-size: 1.1rem; }
-  .outcome-fail { color: #e74c3c; font-weight: bold; font-size: 1.1rem; }
-  .impact-display { font-size: 2rem; font-weight: bold; color: #f0c040; text-align: center; margin: 10px 0; }
-  .label { font-size: 0.75rem; color: #7eb8f7; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
-  .divider { border: none; border-top: 1px solid #2a4a7f; margin: 14px 0; }
-  #join-error { color: #e74c3c; font-size: 0.85rem; margin-top: 6px; display: none; }
-  #debug-log { background: #0a1520; border: 1px solid #2a4a7f; border-radius: 8px; padding: 8px; font-size: 0.7rem; color: #7eb8f7; max-height: 80px; overflow-y: auto; margin-top: 10px; font-family: monospace; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', sans-serif; background: #0a1628; color: #f0f0f0; min-height: 100vh; }
+.screen { display: none; padding: 20px 18px; max-width: 480px; margin: 0 auto; }
+.screen.active { display: block; }
+h1 { font-size: 1.3rem; color: #FFFFFF; margin-bottom: 6px; }
+h2 { font-size: 1rem; color: #B0C4FF; margin-bottom: 8px; }
+p { color: #B0C4FF; line-height: 1.5; font-size: 0.9rem; }
+input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #3A3F8F; background: #0e2044; color: #fff; font-size: 1rem; margin-top: 6px; }
+.btn { display: block; width: 100%; padding: 14px; border-radius: 10px; border: none; cursor: pointer; font-size: 1rem; font-weight: bold; margin-top: 10px; transition: opacity 0.2s; }
+.btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.btn:hover:not(:disabled) { opacity: 0.85; }
+.btn-primary { background: #3A3F8F; color: #fff; }
+.btn-yes { background: #27ae60; color: #fff; }
+.btn-no { background: #B22234; color: #fff; }
+.btn-react { background: #0e2044; color: #f0f0f0; border: 2px solid #3A3F8F; padding: 10px; font-size: 1.3rem; border-radius: 10px; display: inline-block; width: auto; margin: 4px; cursor: pointer; transition: transform 0.1s; }
+.btn-react:active { transform: scale(1.2); }
+.card { background: #0e2044; border-radius: 12px; padding: 16px; border: 1px solid #3A3F8F; margin-bottom: 12px; }
+.label { font-size: 0.72rem; color: #B0C4FF; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+#join-error { color: #ff6666; font-size: 0.82rem; margin-top: 6px; display: none; }
+.char-icon { font-size: 3rem; text-align: center; margin-bottom: 8px; }
+.char-name { font-size: 1.3rem; font-weight: bold; color: #FFD700; text-align: center; }
+.char-role-label { text-align: center; color: #B0C4FF; font-size: 0.85rem; margin-top: 2px; }
+.stance-box { border-radius: 10px; padding: 10px 14px; margin-top: 10px; }
+.interest-box { background: #071530; border-radius: 8px; padding: 10px; margin-top: 8px; font-size: 0.85rem; color: #B0C4FF; line-height: 1.5; font-style: italic; border-left: 3px solid #B22234; }
+.status-dot { width: 9px; height: 9px; border-radius: 50%; background: #FFD700; display: inline-block; margin-right: 5px; animation: pulse 1.5s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.react-grid { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 10px; }
+.vote-btn-row { display: flex; gap: 10px; margin-top: 12px; }
+.vote-btn-row .btn { margin-top: 0; }
+#voted-confirm { display: none; text-align: center; padding: 20px; }
+#debug-log { background: #071530; border: 1px solid #0e2044; border-radius: 6px; padding: 6px; font-size: 0.65rem; color: #3A3F8F; max-height: 60px; overflow-y: auto; font-family: monospace; margin-top: 8px; }
+.speaker-highlight { background: linear-gradient(135deg, #1a0a0a, #0a1628); border: 2px solid #B22234; border-radius: 10px; padding: 12px; margin-bottom: 10px; text-align: center; }
+.result-pass { color: #27ae60; font-size: 1.3rem; font-weight: bold; }
+.result-fail { color: #ff6666; font-size: 1.3rem; font-weight: bold; }
+/* Top stripe accent */
+.top-stripe { height: 6px; background: linear-gradient(90deg, #B22234 33%, #FFFFFF 33%, #FFFFFF 66%, #3A3F8F 66%); }
 </style>
 </head>
 <body>
 
-<!-- JOIN SCREEN -->
+<div class="top-stripe"></div>
+
+<!-- JOIN -->
 <div class="screen active" id="screen-join">
-  <div style="text-align:center;padding-top:40px;">
+  <div style="text-align:center;padding-top:30px;">
     <div style="font-size:3rem;">🏛️</div>
     <h1 style="margin-top:8px;">Legislative Simulation</h1>
-    <p style="margin-top:6px;">Enter your game code and name to join.</p>
+    <p style="margin-top:4px;">Join your class simulation.</p>
   </div>
-  <div style="margin-top:30px;">
+  <div style="margin-top:24px;">
     <div class="label">Game Code</div>
-    <input id="inp-code" type="text" placeholder="Enter 5-letter code" maxlength="5" style="text-transform:uppercase;letter-spacing:4px;font-size:1.3rem;text-align:center;" />
-    <div class="label" style="margin-top:14px;">Your Name</div>
+    <input id="inp-code" type="text" placeholder="5-letter code" maxlength="5" style="text-transform:uppercase;letter-spacing:4px;font-size:1.3rem;text-align:center;" />
+    <div class="label" style="margin-top:12px;">Your Name</div>
     <input id="inp-name" type="text" placeholder="First name or nickname" maxlength="20" />
-    <div id="join-error">Game not found. Check your code and try again.</div>
+    <div id="join-error">Game not found. Check the code and try again.</div>
     <button class="btn btn-primary" onclick="joinGame()">Join Game</button>
   </div>
-  <div id="debug-log">Debug ready...</div>
+  <div id="debug-log">Ready...</div>
 </div>
 
-<!-- ROLE SELECT SCREEN -->
-<div class="screen" id="screen-role">
-  <h1>Choose Your Role</h1>
-  <p style="margin-bottom:16px;">Pick the role you'll play this session.</p>
-  <div id="role-list"></div>
-  <button class="btn btn-primary" id="btn-confirm-role" onclick="confirmRole()" disabled>Confirm Role</button>
-</div>
-
-<!-- LOBBY SCREEN -->
+<!-- LOBBY -->
 <div class="screen" id="screen-lobby">
-  <div style="text-align:center;padding-top:40px;">
-    <div style="font-size:2.5rem;">⏳</div>
-    <h1 style="margin-top:8px;">Waiting for Host</h1>
-    <p style="margin-top:10px;">You're in! The host will start the simulation shortly.</p>
-    <div style="margin-top:20px;">
-      <div class="label">Your Role</div>
-      <div id="lobby-role" class="role-badge" style="font-size:1rem;padding:8px 20px;">–</div>
+  <div style="text-align:center;padding-top:20px;">
+    <div style="font-size:0.72rem;color:#B0C4FF;text-transform:uppercase;letter-spacing:1px;">You have been assigned</div>
+    <div class="char-icon" id="lobby-icon">⏳</div>
+    <div class="char-name" id="lobby-char-name">Waiting...</div>
+    <div class="char-role-label" id="lobby-char-role"></div>
+  </div>
+  <div id="lobby-stance-box" class="stance-box" style="margin-top:12px;"></div>
+  <div id="lobby-interest-box" class="interest-box" style="display:none;"></div>
+  <div class="card" style="margin-top:14px;">
+    <div class="label">Policy Scenario</div>
+    <div id="lobby-problem" style="color:#FFFFFF;font-weight:bold;margin-top:4px;">Waiting for host to start...</div>
+    <div id="lobby-problem-desc" style="margin-top:6px;font-size:0.85rem;color:#B0C4FF;"></div>
+  </div>
+  <div class="card">
+    <div class="label">Proposed Bill</div>
+    <div id="lobby-bill" style="color:#FFFFFF;font-size:0.9rem;line-height:1.5;margin-top:4px;">–</div>
+  </div>
+  <div style="text-align:center;margin-top:10px;">
+    <span class="status-dot"></span>
+    <span style="color:#B0C4FF;font-size:0.85rem;" id="lobby-status">Waiting for host...</span>
+  </div>
+  <div id="debug-log">Listening...</div>
+</div>
+
+<!-- SPEAKING -->
+<div class="screen" id="screen-speaking">
+  <div class="speaker-highlight">
+    <div style="font-size:0.72rem;color:#B0C4FF;text-transform:uppercase;letter-spacing:1px;">Now Speaking</div>
+    <div id="now-speaking-name" style="font-size:1.1rem;font-weight:bold;color:#FFD700;margin-top:4px;">–</div>
+  </div>
+  <div id="your-turn-box" style="display:none;" class="card">
+    <div style="color:#FFD700;font-weight:bold;font-size:1rem;margin-bottom:6px;text-align:center;">🎤 IT'S YOUR TURN TO SPEAK!</div>
+    <div class="label">Your Assigned Stance</div>
+    <div id="your-stance" style="font-weight:bold;font-size:1rem;margin-top:4px;"></div>
+    <div style="margin-top:8px;font-size:0.85rem;color:#B0C4FF;">State your position on the bill. Argue from your assigned stance and represent your character's interests.</div>
+  </div>
+  <div class="card">
+    <div class="label">React in real time 👇</div>
+    <p style="font-size:0.82rem;margin-bottom:4px;">Tap to send a reaction that appears on the host screen.</p>
+    <div class="react-grid">
+      <button class="btn-react" onclick="sendReaction('👏')">👏</button>
+      <button class="btn-react" onclick="sendReaction('🤔')">🤔</button>
+      <button class="btn-react" onclick="sendReaction('👎')">👎</button>
+      <button class="btn-react" onclick="sendReaction('😮')">😮</button>
+      <button class="btn-react" onclick="sendReaction('❓')">❓</button>
+      <button class="btn-react" onclick="sendReaction('💯')">💯</button>
+      <button class="btn-react" onclick="sendReaction('🚫')">🚫</button>
+      <button class="btn-react" onclick="sendReaction('✅')">✅</button>
     </div>
-    <div style="margin-top:16px;" class="card">
-      <div class="label">Policy Scenario</div>
-      <div id="lobby-bill" style="color:#fff;font-weight:bold;margin-top:4px;">Loading...</div>
-      <div id="lobby-desc" style="margin-top:8px;font-size:0.85rem;color:#b0c4de;"></div>
+    <div style="margin-top:10px;">
+      <div class="label">Or type a word (max 20 chars)</div>
+      <div style="display:flex;gap:6px;margin-top:4px;">
+        <input id="react-text" type="text" maxlength="20" placeholder="e.g. Agree! or Too radical" style="margin-top:0;flex:1;" />
+        <button class="btn btn-primary" onclick="sendTextReaction()" style="margin-top:0;width:auto;padding:0 14px;">Send</button>
+      </div>
     </div>
-    <div id="debug-log" style="text-align:left;">Listening for updates...</div>
+  </div>
+  <div style="text-align:center;margin-top:6px;">
+    <span class="status-dot"></span>
+    <span style="color:#B0C4FF;font-size:0.82rem;" id="speaking-status">Listening to speeches...</span>
   </div>
 </div>
 
-<!-- ACTION SCREEN -->
-<div class="screen" id="screen-action">
-  <div class="role-badge" id="action-role">–</div>
+<!-- VOTING -->
+<div class="screen" id="screen-voting">
+  <h1>🗳️ Cast Your Vote</h1>
   <div class="card">
-    <div class="label">Round <span id="action-round">–</span> Bill</div>
-    <div id="action-bill" style="font-weight:bold;color:#fff;margin-top:4px;"></div>
+    <div class="label">Proposed Bill</div>
+    <div id="vote-bill-text" style="color:#FFFFFF;font-size:0.9rem;line-height:1.5;margin-top:4px;"></div>
   </div>
   <div class="card">
-    <div class="label">Your Situation</div>
-    <div id="action-prompt" style="color:#b0c4de;line-height:1.6;font-size:0.9rem;"></div>
+    <div class="label">Your Character</div>
+    <div id="vote-char-name" style="font-weight:bold;color:#FFD700;"></div>
+    <div id="vote-stance" style="font-size:0.82rem;color:#B0C4FF;margin-top:2px;"></div>
+    <div style="font-size:0.78rem;color:#B0C4FF;margin-top:4px;border-top:1px solid #3A3F8F;padding-top:6px;">Vote based on your character's interests and assigned stance.</div>
   </div>
-  <div class="label" style="margin-top:4px;">Choose Your Action</div>
-  <div id="action-choices"></div>
-  <button class="btn btn-primary" id="btn-submit" onclick="submitAction()" disabled style="margin-top:16px;">Submit Action</button>
-  <div id="submitted-msg" style="display:none;text-align:center;margin-top:16px;color:#2ecc71;font-weight:bold;">✔ Action submitted! Waiting for host to resolve...</div>
+  <div id="voted-confirm">
+    <div style="font-size:2.5rem;text-align:center;">⭐</div>
+    <div style="color:#FFD700;font-weight:bold;margin-top:6px;text-align:center;font-size:1.1rem;">Vote submitted!</div>
+    <div style="color:#B0C4FF;font-size:0.85rem;margin-top:4px;text-align:center;">Waiting for host to reveal results...</div>
+  </div>
+  <div id="vote-buttons">
+    <div class="vote-btn-row">
+      <button class="btn btn-yes" onclick="castVote('yes')">✅ YES — Support</button>
+      <button class="btn btn-no" onclick="castVote('no')">❌ NO — Oppose</button>
+    </div>
+  </div>
 </div>
 
-<!-- RESULT SCREEN -->
-<div class="screen" id="screen-result">
-  <h1>Round Result</h1>
-  <div id="result-event" class="event-card" style="display:none;">
-    <h3 id="result-event-title"></h3>
-    <p id="result-event-desc"></p>
+<!-- RESULTS -->
+<div class="screen" id="screen-results">
+  <h1>📊 Round Results</h1>
+  <div class="card" style="text-align:center;border:2px solid #B22234;">
+    <div id="result-verdict-player">–</div>
   </div>
   <div class="card">
-    <div id="result-verdict"></div>
-    <hr class="divider">
-    <div id="result-summary" style="color:#b0c4de;line-height:1.6;font-size:0.9rem;"></div>
+    <div class="label">Bill Type Revealed</div>
+    <div id="result-bill-type" style="font-weight:bold;font-size:1rem;margin-top:4px;"></div>
   </div>
-  <div class="card" style="text-align:center;">
-    <div class="label">Cumulative Policy Impact</div>
-    <div class="impact-display" id="result-impact">0</div>
-    <div style="font-size:0.8rem;color:#b0c4de;">out of 30 possible points</div>
+  <div class="card">
+    <div class="label">What This Means</div>
+    <div id="result-explanation-player" style="color:#B0C4FF;font-size:0.88rem;line-height:1.6;margin-top:4px;"></div>
   </div>
-  <div id="next-round-msg" style="text-align:center;margin-top:16px;">
-    <span class="status-dot"></span><span style="color:#7eb8f7;">Waiting for host to start next round...</span>
-  </div>
-  <div id="final-msg" style="display:none;text-align:center;margin-top:16px;padding:20px;background:#1a2940;border-radius:12px;border:1px solid #2a4a7f;">
-    <div style="font-size:1.2rem;color:#f0c040;font-weight:bold;">🏁 Simulation Complete!</div>
-    <p style="margin-top:8px;">Discuss: Did incrementalism produce better outcomes than sweeping reform?</p>
+  <div style="text-align:center;margin-top:14px;padding:16px;background:#0e2044;border-radius:12px;border:1px solid #3A3F8F;">
+    <span class="status-dot"></span>
+    <span style="color:#B0C4FF;font-size:0.85rem;" id="results-status">Waiting for next round...</span>
   </div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getDatabase, ref, get, update, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { getDatabase, ref, get, update, onValue, push } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
 const FB_URL = "https://legislative-game-default-rtdb.firebaseio.com";
+let db, gameCode, playerId, playerData = {}, currentRound = 0;
 
-// Role definitions — display label maps to Firebase-safe key
-const ROLES = [
-  { key: "Legislator",    label: "Legislator",     icon: "🏛️", desc: "You vote on bills and can propose amendments." },
-  { key: "InterestGroup", label: "Interest Group", icon: "💼", desc: "You lobby legislators and fund campaigns." },
-  { key: "Executive",     label: "Executive",      icon: "🦅", desc: "You can signal support or threaten a veto." },
-  { key: "PublicOpinion", label: "Public Opinion", icon: "👥", desc: "You represent the public's approval or skepticism." },
-  { key: "MediaRep",      label: "Media Rep",      icon: "📺", desc: "You frame the narrative around the bill." }
-];
-
-let db, gameCode, playerId, playerKey, playerLabel, selectedAction = null, currentRound = 0;
-
-function log(msg) {
-  const els = document.querySelectorAll('#debug-log');
-  els.forEach(el => { el.innerHTML += `<div>${new Date().toLocaleTimeString()}: ${msg}</div>`; el.scrollTop = el.scrollHeight; });
-  console.log('PLAYER:', msg);
+function log(m) {
+  document.querySelectorAll('#debug-log').forEach(el => {
+    el.innerHTML += `<div>${new Date().toLocaleTimeString()}: ${m}</div>`;
+    el.scrollTop = el.scrollHeight;
+  });
 }
-
-function show(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
+function show(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
 
 const params = new URLSearchParams(window.location.search);
 if (params.get('code')) document.getElementById('inp-code').value = params.get('code').toUpperCase();
@@ -158,142 +197,135 @@ if (params.get('code')) document.getElementById('inp-code').value = params.get('
 window.joinGame = async function() {
   const code = document.getElementById('inp-code').value.trim().toUpperCase();
   const name = document.getElementById('inp-name').value.trim();
-  if (!code || !name) { alert('Please enter the game code and your name.'); return; }
-  log(`Joining ${code} as ${name}...`);
+  if (!code || !name) { alert('Enter code and name.'); return; }
   try {
-    const app = initializeApp({ databaseURL: FB_URL }, `player_${Date.now()}`);
+    const app = initializeApp({ databaseURL: FB_URL }, `p_${Date.now()}`);
     db = getDatabase(app);
     const snap = await get(ref(db, `games/${code}`));
     if (!snap.exists()) { document.getElementById('join-error').style.display = 'block'; return; }
     gameCode = code;
     playerId = 'p_' + Date.now();
-    window._playerName = name;
-    log(`Game found. ID: ${playerId}`);
-
-    const taken = Object.values(snap.val().players || {}).map(p => p.roleKey);
-    document.getElementById('role-list').innerHTML = ROLES.map(r => `
-      <div onclick="selectRole('${r.key}')" id="role-${r.key}" class="btn btn-action" style="display:flex;gap:12px;align-items:flex-start;">
-        <span style="font-size:1.5rem;">${r.icon}</span>
-        <div>
-          <div style="font-weight:bold;color:#fff;">${r.label}</div>
-          <div style="font-size:0.8rem;color:#b0c4de;margin-top:2px;">${r.desc}</div>
-          ${taken.includes(r.key) ? '<div style="font-size:0.75rem;color:#e74c3c;margin-top:2px;">(taken)</div>' : ''}
-        </div>
-      </div>`).join('');
-    show('screen-role');
-  } catch(e) {
-    log(`ERROR: ${e.message}`);
-    document.getElementById('join-error').style.display = 'block';
-  }
-};
-
-window.selectRole = function(key) {
-  document.querySelectorAll('.btn-action').forEach(b => b.classList.remove('selected'));
-  document.getElementById(`role-${key}`).classList.add('selected');
-  const role = ROLES.find(r => r.key === key);
-  playerKey = role.key;
-  playerLabel = role.label;
-  document.getElementById('btn-confirm-role').disabled = false;
-  log(`Role selected: ${playerLabel} (key: ${playerKey})`);
-};
-
-window.confirmRole = async function() {
-  log(`Confirming role: ${playerKey}`);
-  try {
-    await update(ref(db, `games/${gameCode}/players/${playerId}`), {
-      name: window._playerName,
-      role: playerLabel,
-      roleKey: playerKey,
-      submitted: false,
-      action: null
-    });
-    log('Written to Firebase OK');
-    document.getElementById('lobby-role').textContent = playerLabel;
-    const snap = await get(ref(db, `games/${gameCode}/scenario`));
-    const s = snap.val();
-    document.getElementById('lobby-bill').textContent = s.title;
-    document.getElementById('lobby-desc').textContent = s.description;
+    await update(ref(db, `games/${gameCode}/players/${playerId}`), { name, joined: true });
     show('screen-lobby');
-    setTimeout(() => {
-      log('Attaching listener...');
-      listenToGame();
-    }, 800);
-  } catch(e) {
-    log(`ERROR: ${e.message}`);
-  }
+    listenToGame();
+  } catch(e) { log(`ERROR: ${e.message}`); document.getElementById('join-error').style.display = 'block'; }
 };
 
 function listenToGame() {
   onValue(ref(db, `games/${gameCode}`), snap => {
-    const state = snap.val();
-    if (!state) { log('Null state received'); return; }
-    log(`Update — phase: ${state.phase}, round: ${state.round}`);
-    const activeScreen = document.querySelector('.screen.active')?.id;
-    if (state.phase === 'round') {
-      if (state.round !== currentRound || activeScreen === 'screen-lobby') {
+    const state = snap.val(); if (!state) return;
+    const me = (state.players || {})[playerId] || {};
+    playerData = me;
+    const phase = state.phase;
+    const active = document.querySelector('.screen.active')?.id;
+
+    if (me.charName) updateLobbyChar(me, state);
+
+    if (phase === 'lobby') {
+      if (active !== 'screen-lobby') show('screen-lobby');
+    } else if (phase === 'speaking' || phase === 'pre-vote') {
+      if (active === 'screen-lobby' || state.round !== currentRound) {
         currentRound = state.round;
-        showActionScreen(state);
+        show('screen-speaking');
       }
-    } else if ((state.phase === 'between' || state.phase === 'done') && activeScreen === 'screen-action') {
-      showResultScreen(state);
+      updateSpeakingScreen(state, me);
+    } else if (phase === 'voting' && !me.voted) {
+      showVotingScreen(state, me);
+    } else if (phase === 'results') {
+      if (active !== 'screen-results') showResultsScreen(state);
     }
-  }, err => log(`Listener error: ${err.message}`));
-  log(`Listener attached to games/${gameCode}`);
+  });
 }
 
-function showActionScreen(state) {
-  selectedAction = null;
-  const bill = state.currentBill;
-  // Look up prompt using the Firebase-safe key
-  const myPrompt = (state.rolePrompts || {})[playerKey] || { prompt: "Make your decision for this round.", choices: ["Support the bill", "Oppose the bill"] };
-  log(`Action screen — prompt key: ${playerKey}, prompt: ${myPrompt.prompt?.substring(0,40)}`);
-  document.getElementById('action-role').textContent = playerLabel;
-  document.getElementById('action-round').textContent = state.round;
-  document.getElementById('action-bill').textContent = bill.billOption;
-  document.getElementById('action-prompt').textContent = myPrompt.prompt;
-  document.getElementById('action-choices').innerHTML = (myPrompt.choices || []).map(c =>
-    `<div class="btn btn-action" onclick="selectAction(this,'${c.replace(/'/g,"\\'")}')">${c}</div>`).join('');
-  document.getElementById('btn-submit').disabled = true;
-  document.getElementById('submitted-msg').style.display = 'none';
-  show('screen-action');
+function updateLobbyChar(me, state) {
+  document.getElementById('lobby-icon').textContent = me.charIcon || '👥';
+  document.getElementById('lobby-char-name').textContent = me.charName || '–';
+  document.getElementById('lobby-char-role').textContent = me.charRole || '';
+  const stanceBox = document.getElementById('lobby-stance-box');
+  const isInc = me.stance === 'incrementalism';
+  stanceBox.style.background = isInc ? '#0a2a14' : '#2a0a0a';
+  stanceBox.innerHTML = `
+    <div style="font-size:0.72rem;color:${isInc?'#27ae60':'#ff6666'};text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Your Assigned Stance</div>
+    <div style="font-size:1rem;font-weight:bold;color:${isInc?'#27ae60':'#ff6666'};">${(me.stance||'').toUpperCase()}</div>
+    <div style="font-size:0.8rem;color:#B0C4FF;margin-top:4px;">You must argue from this position when it's your turn to speak.</div>`;
+  if (me.interest && me.isMajor) {
+    const ib = document.getElementById('lobby-interest-box');
+    ib.style.display = 'block';
+    ib.textContent = me.interest;
+  }
+  if (state.scenario) {
+    document.getElementById('lobby-problem').textContent = state.scenario.problem || '';
+    document.getElementById('lobby-problem-desc').textContent = state.scenario.problemDesc || '';
+  }
+  if (state.bill) document.getElementById('lobby-bill').textContent = state.bill;
+  document.getElementById('lobby-status').textContent = me.isMajor
+    ? "Prepare your argument. Host will call you when it's your turn."
+    : 'Get ready to react and vote!';
 }
 
-window.selectAction = function(el, action) {
-  document.querySelectorAll('#action-choices .btn-action').forEach(b => b.classList.remove('selected'));
-  el.classList.add('selected');
-  selectedAction = action;
-  document.getElementById('btn-submit').disabled = false;
+const SPEAKER_NAMES = {
+  Senator: '🏛️ Senator Olive Politicks',
+  HouseRep: '📋 Rep. Marcus Ledger',
+  LobbyistA: '💼 Vera Cashwell',
+  LobbyistB: '✊ Hank Pressure',
+  Executive: '🦅 Secretary Diana Powers',
+  MediaRep: '📺 Sal Scoop'
 };
 
-window.submitAction = async function() {
-  if (!selectedAction) return;
-  try {
-    await update(ref(db, `games/${gameCode}/players/${playerId}`), { submitted: true, action: selectedAction });
-    document.getElementById('btn-submit').disabled = true;
-    document.getElementById('submitted-msg').style.display = 'block';
-    log('Action submitted');
-  } catch(e) {
-    log(`ERROR submitting: ${e.message}`);
+function updateSpeakingScreen(state, me) {
+  const cs = state.currentSpeaker;
+  document.getElementById('now-speaking-name').textContent = cs
+    ? (SPEAKER_NAMES[cs] || cs)
+    : (state.phase === 'pre-vote' ? 'All speakers done — voting opens soon.' : 'Waiting for host...');
+  const myTurn = me.isMajor && me.charKey === cs;
+  document.getElementById('your-turn-box').style.display = myTurn ? 'block' : 'none';
+  if (myTurn) {
+    const isInc = me.stance === 'incrementalism';
+    document.getElementById('your-stance').textContent = (me.stance || '').toUpperCase();
+    document.getElementById('your-stance').style.color = isInc ? '#27ae60' : '#ff6666';
   }
+  document.getElementById('speaking-status').textContent = cs
+    ? `React to ${SPEAKER_NAMES[cs] || cs}'s statement`
+    : 'Waiting for next speaker...';
+}
+
+window.sendReaction = async function(emoji) {
+  if (!db || !gameCode) return;
+  await push(ref(db, `games/${gameCode}/reactions`), { text: emoji, name: playerData.name || '?', ts: Date.now() });
+};
+window.sendTextReaction = async function() {
+  const txt = document.getElementById('react-text').value.trim();
+  if (!txt) return;
+  await push(ref(db, `games/${gameCode}/reactions`), { text: txt, name: playerData.name || '?', ts: Date.now() });
+  document.getElementById('react-text').value = '';
 };
 
-function showResultScreen(state) {
-  const outcome = state.lastOutcome || {};
-  const event = state.lastEvent;
-  document.getElementById('result-event').style.display = event ? 'block' : 'none';
-  if (event) {
-    document.getElementById('result-event-title').textContent = '⚡ ' + event.title;
-    document.getElementById('result-event-desc').textContent = event.description;
-  }
-  document.getElementById('result-verdict').innerHTML = outcome.passed
-    ? '<div class="outcome-pass">✅ Bill Passed</div>'
-    : '<div class="outcome-fail">❌ Bill Failed</div>';
-  document.getElementById('result-summary').textContent = outcome.summary || '';
-  document.getElementById('result-impact').textContent = state.totalImpact || 0;
-  const done = state.phase === 'done';
-  document.getElementById('next-round-msg').style.display = done ? 'none' : 'block';
-  document.getElementById('final-msg').style.display = done ? 'block' : 'none';
-  show('screen-result');
+function showVotingScreen(state, me) {
+  document.getElementById('vote-bill-text').textContent = state.bill || '–';
+  document.getElementById('vote-char-name').textContent = `${me.charIcon || ''} ${me.charName || 'You'}`;
+  document.getElementById('vote-stance').textContent = `Stance: ${(me.stance || '').toUpperCase()}`;
+  document.getElementById('voted-confirm').style.display = 'none';
+  document.getElementById('vote-buttons').style.display = 'block';
+  show('screen-voting');
+}
+
+window.castVote = async function(vote) {
+  await update(ref(db, `games/${gameCode}/players/${playerId}`), { vote, voted: true });
+  document.getElementById('vote-buttons').style.display = 'none';
+  document.getElementById('voted-confirm').style.display = 'block';
+};
+
+function showResultsScreen(state) {
+  const passed = state.passed;
+  document.getElementById('result-verdict-player').innerHTML = passed
+    ? '<div class="result-pass">✅ The Bill Passed</div>'
+    : '<div class="result-fail">❌ The Bill Failed</div>';
+  const isInc = state.billType === 'incremental';
+  document.getElementById('result-bill-type').innerHTML = `<span style="color:${isInc?'#27ae60':'#ff6666'};">${(state.billType||'').toUpperCase()}</span> bill`;
+  document.getElementById('result-explanation-player').textContent = state.resultSummary || '';
+  document.getElementById('results-status').textContent = state.round < 2
+    ? 'Waiting for Round 2...' : '🏁 Simulation complete! Discuss with your class.';
+  show('screen-results');
 }
 </script>
 </body>
