@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Legislative Sim — Player</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #0d1b2a; color: #e0e0e0; min-height: 100vh; }
+  .screen { display: none; padding: 24px 20px; max-width: 480px; margin: 0 auto; }
+  .screen.active { display: block; }
+  h1 { font-size: 1.4rem; color: #7eb8f7; margin-bottom: 8px; }
+  p { color: #b0c4de; line-height: 1.5; font-size: 0.92rem; }
+  input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #2a4a7f; background: #1a2940; color: #fff; font-size: 1rem; margin-top: 8px; }
+  .btn { display: block; width: 100%; padding: 14px; border-radius: 10px; border: none; cursor: pointer; font-size: 1rem; font-weight: bold; margin-top: 12px; transition: opacity 0.2s; }
+  .btn:hover { opacity: 0.85; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-primary { background: #2a6fc9; color: #fff; }
+  .btn-action { background: #1a2940; color: #e0e0e0; border: 2px solid #2a4a7f; text-align: left; padding: 14px 16px; line-height: 1.4; margin-top: 10px; }
+  .btn-action.selected { border-color: #7eb8f7; background: #1e3a5f; color: #fff; }
+  .btn-action.selected::before { content: "✔ "; color: #7eb8f7; }
+  .card { background: #1a2940; border-radius: 12px; padding: 18px; border: 1px solid #2a4a7f; margin-bottom: 14px; }
+  .role-badge { display: inline-block; padding: 4px 12px; border-radius: 10px; background: #2a4a7f; color: #f0c040; font-weight: bold; font-size: 0.85rem; margin-bottom: 10px; }
+  .event-card { background: linear-gradient(135deg, #4a1942, #2a0a40); border: 1px solid #9b59b6; border-radius: 12px; padding: 18px; margin-bottom: 14px; }
+  .event-card h3 { color: #e056fd; margin-bottom: 8px; }
+  .status-dot { width: 10px; height: 10px; border-radius: 50%; background: #f0c040; display: inline-block; margin-right: 6px; animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .outcome-pass { color: #2ecc71; font-weight: bold; font-size: 1.1rem; }
+  .outcome-fail { color: #e74c3c; font-weight: bold; font-size: 1.1rem; }
+  .impact-display { font-size: 2rem; font-weight: bold; color: #f0c040; text-align: center; margin: 10px 0; }
+  .label { font-size: 0.75rem; color: #7eb8f7; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+  .divider { border: none; border-top: 1px solid #2a4a7f; margin: 14px 0; }
+  #join-error { color: #e74c3c; font-size: 0.85rem; margin-top: 6px; display: none; }
+</style>
+</head>
+<body>
+
+<!-- JOIN SCREEN -->
+<div class="screen active" id="screen-join">
+  <div style="text-align:center;padding-top:40px;">
+    <div style="font-size:3rem;">🏛️</div>
+    <h1 style="margin-top:8px;">Legislative Simulation</h1>
+    <p style="margin-top:6px;">Enter your game code and name to join.</p>
+  </div>
+  <div style="margin-top:30px;">
+    <div class="label">Game Code</div>
+    <input id="inp-code" type="text" placeholder="Enter 5-letter code" maxlength="5" style="text-transform:uppercase;letter-spacing:4px;font-size:1.3rem;text-align:center;" />
+    <div class="label" style="margin-top:14px;">Your Name</div>
+    <input id="inp-name" type="text" placeholder="First name or nickname" maxlength="20" />
+    <div id="join-error">Game not found. Check your code and try again.</div>
+    <button class="btn btn-primary" onclick="joinGame()">Join Game</button>
+  </div>
+</div>
+
+<!-- ROLE SELECT SCREEN -->
+<div class="screen" id="screen-role">
+  <h1>Choose Your Role</h1>
+  <p style="margin-bottom:16px;">Pick the role you'll play this session. Each role has unique actions each round.</p>
+  <div id="role-list"></div>
+  <button class="btn btn-primary" id="btn-confirm-role" onclick="confirmRole()" disabled>Confirm Role</button>
+</div>
+
+<!-- LOBBY SCREEN -->
+<div class="screen" id="screen-lobby">
+  <div style="text-align:center;padding-top:40px;">
+    <div style="font-size:2.5rem;">⏳</div>
+    <h1 style="margin-top:8px;">Waiting for Host</h1>
+    <p style="margin-top:10px;">You're in! The host will start the simulation shortly.</p>
+    <div style="margin-top:20px;">
+      <div class="label">Your Role</div>
+      <div id="lobby-role" class="role-badge" style="font-size:1rem;padding:8px 20px;">–</div>
+    </div>
+    <div style="margin-top:16px;" class="card">
+      <div class="label">Policy Scenario</div>
+      <div id="lobby-bill" style="color:#fff;font-weight:bold;margin-top:4px;">Loading...</div>
+      <div id="lobby-desc" style="margin-top:8px;font-size:0.85rem;color:#b0c4de;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ACTION SCREEN -->
+<div class="screen" id="screen-action">
+  <div class="role-badge" id="action-role">–</div>
+  <div class="card">
+    <div class="label">Round <span id="action-round">–</span> Bill</div>
+    <div id="action-bill" style="font-weight:bold;color:#fff;margin-top:4px;"></div>
+  </div>
+  <div class="card">
+    <div class="label">Your Situation</div>
+    <div id="action-prompt" style="color:#b0c4de;line-height:1.6;font-size:0.9rem;"></div>
+  </div>
+  <div class="label" style="margin-top:4px;">Choose Your Action</div>
+  <div id="action-choices"></div>
+  <button class="btn btn-primary" id="btn-submit" onclick="submitAction()" disabled style="margin-top:16px;">Submit Action</button>
+  <div id="submitted-msg" style="display:none;text-align:center;margin-top:16px;color:#2ecc71;font-weight:bold;">✔ Action submitted! Waiting for host to resolve...</div>
+</div>
+
+<!-- RESULT SCREEN -->
+<div class="screen" id="screen-result">
+  <h1>Round Result</h1>
+  <div id="result-event" class="event-card" style="display:none;">
+    <h3 id="result-event-title"></h3>
+    <p id="result-event-desc"></p>
+  </div>
+  <div class="card">
+    <div id="result-verdict"></div>
+    <hr class="divider">
+    <div id="result-summary" style="color:#b0c4de;line-height:1.6;font-size:0.9rem;"></div>
+  </div>
+  <div class="card" style="text-align:center;">
+    <div class="label">Cumulative Policy Impact</div>
+    <div class="impact-display" id="result-impact">0</div>
+    <div style="font-size:0.8rem;color:#b0c4de;">out of 30 possible points</div>
+  </div>
+  <div id="next-round-msg" style="text-align:center;margin-top:16px;">
+    <span class="status-dot"></span><span style="color:#7eb8f7;">Waiting for host to start next round...</span>
+  </div>
+  <div id="final-msg" style="display:none;text-align:center;margin-top:16px;padding:20px;background:#1a2940;border-radius:12px;border:1px solid #2a4a7f;">
+    <div style="font-size:1.2rem;color:#f0c040;font-weight:bold;">🏁 Simulation Complete!</div>
+    <p style="margin-top:8px;">Discuss with your class: Did incrementalism produce better outcomes than sweeping reform?</p>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, get, update, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const FB_URL = "https://legislative-game-default-rtdb.firebaseio.com";
+const ROLES = [
+  { id: "senator",   label: "Senator / House Rep",  icon: "🏛️", desc: "You vote on bills and can propose amendments." },
+  { id: "interest",  label: "Interest Group",        icon: "💼", desc: "You lobby legislators and fund campaigns." },
+  { id: "executive", label: "Executive Branch",      icon: "🦅", desc: "You can signal support or threaten a veto." },
+  { id: "public",    label: "Public Opinion",        icon: "👥", desc: "You represent the public's approval or skepticism." },
+  { id: "media",     label: "Media Rep",             icon: "📺", desc: "You frame the narrative around the bill." }
+];
+
+let db, gameCode, playerId, playerRole, selectedAction = null, currentRound = 0;
+
+function show(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+
+const params = new URLSearchParams(window.location.search);
+if (params.get('code')) document.getElementById('inp-code').value = params.get('code').toUpperCase();
+
+window.joinGame = async function() {
+  const code = document.getElementById('inp-code').value.trim().toUpperCase();
+  const name = document.getElementById('inp-name').value.trim();
+  if (!code || !name) { alert('Please enter the game code and your name.'); return; }
+  try {
+    const app = initializeApp({ databaseURL: FB_URL }, `player_${Date.now()}`);
+    db = getDatabase(app);
+    const snap = await get(ref(db, `games/${code}`));
+    if (!snap.exists()) { document.getElementById('join-error').style.display = 'block'; return; }
+    gameCode = code;
+    playerId = 'p_' + Date.now();
+    window._playerName = name;
+
+    const taken = Object.values(snap.val().players || {}).map(p => p.role);
+    document.getElementById('role-list').innerHTML = ROLES.map(r => `
+      <div onclick="selectRole('${r.id}')" id="role-${r.id}" class="btn btn-action" style="display:flex;gap:12px;align-items:flex-start;">
+        <span style="font-size:1.5rem;">${r.icon}</span>
+        <div>
+          <div style="font-weight:bold;color:#fff;">${r.label}</div>
+          <div style="font-size:0.8rem;color:#b0c4de;margin-top:2px;">${r.desc}</div>
+          ${taken.includes(r.label) ? '<div style="font-size:0.75rem;color:#e74c3c;margin-top:2px;">(taken)</div>' : ''}
+        </div>
+      </div>`).join('');
+    show('screen-role');
+  } catch(e) { document.getElementById('join-error').style.display = 'block'; }
+};
+
+window.selectRole = function(id) {
+  document.querySelectorAll('.btn-action').forEach(b => b.classList.remove('selected'));
+  document.getElementById(`role-${id}`).classList.add('selected');
+  playerRole = ROLES.find(r => r.id === id).label;
+  document.getElementById('btn-confirm-role').disabled = false;
+};
+
+window.confirmRole = async function() {
+  await update(ref(db, `games/${gameCode}/players/${playerId}`), {
+    name: window._playerName, role: playerRole, submitted: false, action: null
+  });
+  document.getElementById('lobby-role').textContent = playerRole;
+  const snap = await get(ref(db, `games/${gameCode}/scenario`));
+  const s = snap.val();
+  document.getElementById('lobby-bill').textContent = s.title;
+  document.getElementById('lobby-desc').textContent = s.description;
+  show('screen-lobby');
+  listenToGame();
+};
+
+function listenToGame() {
+  onValue(ref(db, `games/${gameCode}`), snap => {
+    const state = snap.val();
+    if (!state) return;
+    if (state.phase === 'round' && state.round !== currentRound) {
+      currentRound = state.round;
+      showActionScreen(state);
+    } else if ((state.phase === 'between' || state.phase === 'done') && document.getElementById('screen-action').classList.contains('active')) {
+      showResultScreen(state);
+    }
+  });
+}
+
+function showActionScreen(state) {
+  selectedAction = null;
+  const bill = state.currentBill;
+  const myPrompt = (state.rolePrompts || {})[playerRole] || { prompt: "Make your decision for this round.", choices: ["Support the bill", "Oppose the bill"] };
+  document.getElementById('action-role').textContent = playerRole;
+  document.getElementById('action-round').textContent = state.round;
+  document.getElementById('action-bill').textContent = bill.billOption;
+  document.getElementById('action-prompt').textContent = myPrompt.prompt;
+  document.getElementById('action-choices').innerHTML = (myPrompt.choices || []).map(c =>
+    `<div class="btn btn-action" onclick="selectAction(this,'${c.replace(/'/g,"\\'")}')">${c}</div>`).join('');
+  document.getElementById('btn-submit').disabled = true;
+  document.getElementById('submitted-msg').style.display = 'none';
+  show('screen-action');
+}
+
+window.selectAction = function(el, action) {
+  document.querySelectorAll('#action-choices .btn-action').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedAction = action;
+  document.getElementById('btn-submit').disabled = false;
+};
+
+window.submitAction = async function() {
+  if (!selectedAction) return;
+  await update(ref(db, `games/${gameCode}/players/${playerId}`), { submitted: true, action: selectedAction });
+  document.getElementById('btn-submit').disabled = true;
+  document.getElementById('submitted-msg').style.display = 'block';
+};
+
+function showResultScreen(state) {
+  const outcome = state.lastOutcome || {};
+  const event = state.lastEvent;
+  document.getElementById('result-event').style.display = event ? 'block' : 'none';
+  if (event) {
+    document.getElementById('result-event-title').textContent = '⚡ ' + event.title;
+    document.getElementById('result-event-desc').textContent = event.description;
+  }
+  document.getElementById('result-verdict').innerHTML = outcome.passed
+    ? '<div class="outcome-pass">✅ Bill Passed</div>'
+    : '<div class="outcome-fail">❌ Bill Failed</div>';
+  document.getElementById('result-summary').textContent = outcome.summary || '';
+  document.getElementById('result-impact').textContent = state.totalImpact || 0;
+  const done = state.phase === 'done';
+  document.getElementById('next-round-msg').style.display = done ? 'none' : 'block';
+  document.getElementById('final-msg').style.display = done ? 'block' : 'none';
+  show('screen-result');
+}
+</script>
+</body>
+</html>
