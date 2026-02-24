@@ -9,108 +9,95 @@
 body { font-family: 'Segoe UI', sans-serif; background: #0a1628; color: #f0f0f0; min-height: 100vh; }
 header { background: #B22234; padding: 14px 28px; display: flex; justify-content: space-between; align-items: center; border-bottom: 4px solid #FFFFFF; }
 header h1 { font-size: 1.2rem; color: #FFFFFF; letter-spacing: 1px; }
-#code-box { text-align: right; }
 #game-code-display { font-size: 2rem; font-weight: bold; color: #FFFFFF; letter-spacing: 4px; }
 #player-url-hint { font-size: 0.75rem; color: #f0c0c0; }
-.main { display: grid; grid-template-columns: 1fr 320px; gap: 16px; padding: 16px 28px; }
-.card { background: #0e2044; border-radius: 12px; padding: 18px; border: 1px solid #3A3F8F; margin-bottom: 14px; }
-h2 { font-size: 0.85rem; color: #B0C4FF; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
-.btn { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-size: 0.9rem; font-weight: bold; transition: opacity 0.2s; }
+.main { display: grid; grid-template-columns: 1fr 340px; gap: 16px; padding: 16px 28px; }
+.card { background: #0e2044; border-radius: 12px; padding: 16px; border: 1px solid #3A3F8F; margin-bottom: 12px; }
+h2 { font-size: 0.82rem; color: #B0C4FF; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+.btn { padding: 10px 18px; border-radius: 8px; border: none; cursor: pointer; font-size: 0.88rem; font-weight: bold; transition: opacity 0.2s; }
 .btn:disabled { opacity: 0.35; cursor: not-allowed; }
-.btn:hover:not(:disabled) { opacity: 0.85; }
+.btn:hover:not(:disabled) { opacity: 0.82; }
 .btn-primary { background: #3A3F8F; color: #fff; }
 .btn-success { background: #27ae60; color: #fff; }
 .btn-danger { background: #B22234; color: #fff; }
-.btn-warning { background: #c0392b; color: #fff; }
-.btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.btn-gold { background: #FFD700; color: #0a1628; }
+.btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+
 /* Setup */
-#setup-screen { position: fixed; inset: 0; background: #0a1628; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; z-index: 100; padding: 24px; }
-#setup-screen h1 { font-size: 1.8rem; color: #FFFFFF; }
-#setup-screen p { color: #B0C4FF; text-align: center; max-width: 480px; font-size: 0.92rem; }
-#setup-form { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 480px; }
-#setup-form label { color: #B0C4FF; font-size: 0.82rem; }
-#setup-form select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #3A3F8F; background: #0e2044; color: #fff; font-size: 0.95rem; }
+#setup-screen { position: fixed; inset: 0; background: #0a1628; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; z-index: 100; padding: 24px; overflow-y: auto; }
+#setup-screen h1 { font-size: 1.7rem; color: #FFFFFF; }
+#setup-screen p { color: #B0C4FF; text-align: center; max-width: 560px; font-size: 0.9rem; }
+.setup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; max-width: 680px; }
+.setup-bill-card { background: #0e2044; border-radius: 10px; padding: 12px; border: 2px solid; }
+.setup-bill-card label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 4px; }
+.setup-bill-card select { width: 100%; padding: 7px; border-radius: 6px; border: 1px solid #3A3F8F; background: #071530; color: #fff; font-size: 0.85rem; margin-top: 4px; }
+.setup-bill-card textarea { width: 100%; padding: 7px; border-radius: 6px; border: 1px solid #3A3F8F; background: #071530; color: #fff; font-size: 0.82rem; margin-top: 4px; resize: vertical; min-height: 70px; }
+
 /* Phase banner */
-#phase-banner { background: #B22234; border-radius: 10px; padding: 10px 16px; font-size: 0.85rem; font-weight: bold; color: #FFFFFF; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; border-left: 5px solid #FFFFFF; }
-/* Policy card */
-#policy-title { font-size: 1.4rem; font-weight: bold; color: #FFFFFF; margin-bottom: 6px; }
-#policy-desc { color: #B0C4FF; line-height: 1.6; font-size: 0.9rem; }
-#bill-box { background: #071530; border-radius: 10px; padding: 14px; margin-top: 12px; border-left: 4px solid #B22234; }
-#bill-label { font-size: 0.75rem; color: #B0C4FF; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
-#bill-text { font-size: 1rem; color: #FFFFFF; font-weight: bold; line-height: 1.5; }
-#bill-type-reveal { display: none; margin-top: 8px; padding: 6px 12px; border-radius: 8px; font-size: 0.85rem; font-weight: bold; }
+#phase-banner { background: #B22234; border-radius: 10px; padding: 10px 16px; font-size: 0.88rem; font-weight: bold; color: #FFFFFF; margin-bottom: 14px; border-left: 5px solid #FFFFFF; }
+
+/* Bills grid */
+#bills-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.bill-card { border-radius: 10px; padding: 12px; border: 2px solid; }
+.bill-card .legislator-name { font-weight: bold; font-size: 0.95rem; }
+.bill-card .bill-text { font-size: 0.82rem; margin-top: 6px; line-height: 1.5; color: #e0e0e0; }
+
+/* Caucus timer */
+#caucus-box { display: none; }
+#caucus-timer { font-size: 4rem; font-weight: bold; text-align: center; font-family: monospace; color: #FFD700; }
+#caucus-bar-bg { background: #071530; border-radius: 8px; height: 12px; overflow: hidden; margin-top: 8px; }
+#caucus-bar { height: 100%; border-radius: 8px; background: #FFD700; transition: width 1s linear; }
+
 /* Speaker */
-#speaker-card { background: linear-gradient(135deg, #0e2044, #071530); border: 2px solid #B22234; }
-#speaker-name { font-size: 1.6rem; font-weight: bold; color: #FFFFFF; }
-#speaker-role { font-size: 0.9rem; color: #B0C4FF; margin-top: 2px; }
-#speaker-stance { display: inline-block; padding: 3px 10px; border-radius: 10px; font-size: 0.8rem; font-weight: bold; margin-top: 8px; }
-#speaker-interest { color: #B0C4FF; font-size: 0.88rem; margin-top: 8px; line-height: 1.5; font-style: italic; }
-/* Timer */
-#timer-display { font-size: 3.5rem; font-weight: bold; color: #FFFFFF; text-align: center; font-family: monospace; }
+#speaker-box { display: none; }
+#speaker-name { font-size: 1.5rem; font-weight: bold; color: #FFFFFF; }
+#speaker-title { font-size: 0.88rem; color: #B0C4FF; margin-top: 2px; }
+#speaker-bill { font-size: 0.9rem; margin-top: 10px; line-height: 1.5; padding: 10px; border-radius: 8px; background: #071530; }
+#timer-display { font-size: 3rem; font-weight: bold; text-align: center; font-family: monospace; color: #FFFFFF; margin-top: 10px; }
 #timer-display.warning { color: #FFD700; }
-#timer-display.danger { color: #B22234; }
+#timer-display.danger { color: #ff6666; }
 #timer-bar-bg { background: #071530; border-radius: 8px; height: 10px; overflow: hidden; margin-top: 6px; }
-#timer-bar { height: 100%; border-radius: 8px; background: #27ae60; transition: width 1s linear, background 1s; }
-/* Reactions */
-#reaction-stage { background: #071530; border-radius: 12px; min-height: 80px; padding: 10px; position: relative; overflow: hidden; border: 1px solid #3A3F8F; margin-top: 10px; }
-#reaction-stage-label { font-size: 0.7rem; color: #B0C4FF; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
-.reaction-bubble { position: absolute; animation: floatUp 3s ease-out forwards; font-size: 1.4rem; pointer-events: none; white-space: nowrap; background: rgba(58,63,143,0.75); border-radius: 20px; padding: 2px 8px; color: #fff; }
-@keyframes floatUp { 0%{opacity:1;transform:translateY(0)} 100%{opacity:0;transform:translateY(-120px)} }
-/* Vote results */
-#vote-results { display: none; }
-#vote-bar-wrap { margin-top: 10px; }
-.vote-bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 0.85rem; }
-.vote-bar-bg { flex: 1; background: #071530; border-radius: 6px; height: 14px; overflow: hidden; }
-.vote-bar-fill { height: 100%; border-radius: 6px; transition: width 0.8s ease; }
-#result-verdict { font-size: 1.4rem; font-weight: bold; margin: 10px 0; }
-#result-explanation { color: #B0C4FF; font-size: 0.88rem; line-height: 1.6; }
-/* Players list */
-.player-chip { background: #071530; border-radius: 8px; padding: 7px 10px; font-size: 0.8rem; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #3A3F8F; }
-.player-chip .role-tag { font-size: 0.7rem; color: #FFD700; font-weight: bold; }
-.player-chip .voted-tag { font-size: 0.7rem; background: #27ae60; color: #fff; padding: 1px 6px; border-radius: 8px; }
-/* Round dots */
-.round-dot { width: 26px; height: 26px; border-radius: 50%; background: #071530; border: 2px solid #3A3F8F; display: inline-flex; align-items: center; justify-content: center; font-size: 0.7rem; color: #B0C4FF; font-weight: bold; margin-right: 6px; }
-.round-dot.active { background: #B22234; border-color: #FFFFFF; color: #fff; }
-.round-dot.done { background: #27ae60; border-color: #27ae60; color: #fff; }
-#debug-log { background: #071530; border: 1px solid #0e2044; border-radius: 6px; padding: 6px 8px; font-size: 0.68rem; color: #3A3F8F; max-height: 70px; overflow-y: auto; font-family: monospace; margin-top: 8px; }
-/* Stars accent */
-.stars-accent { color: #FFFFFF; letter-spacing: 3px; font-size: 0.8rem; }
+#timer-bar { height: 100%; border-radius: 8px; background: #27ae60; transition: width 1s linear; }
+#reaction-stage { background: #071530; border-radius: 10px; min-height: 70px; padding: 8px; position: relative; overflow: hidden; border: 1px solid #3A3F8F; margin-top: 10px; }
+.reaction-bubble { position: absolute; animation: floatUp 3s ease-out forwards; font-size: 1.3rem; pointer-events: none; white-space: nowrap; background: rgba(58,63,143,0.8); border-radius: 20px; padding: 2px 8px; color: #fff; }
+@keyframes floatUp { 0%{opacity:1;transform:translateY(0)} 100%{opacity:0;transform:translateY(-100px)} }
+
+/* Voting live tally */
+#voting-tally-box { display: none; }
+.tally-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 0.85rem; }
+.tally-bar-bg { flex: 1; background: #071530; border-radius: 6px; height: 22px; overflow: hidden; }
+.tally-bar-fill { height: 100%; border-radius: 6px; transition: width 0.5s ease; display: flex; align-items: center; padding-left: 8px; font-size: 0.75rem; font-weight: bold; color: #fff; }
+
+/* Results */
+#results-box { display: none; }
+.result-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 0.85rem; }
+.result-bar-bg { flex: 1; background: #071530; border-radius: 6px; height: 18px; overflow: hidden; }
+.result-bar-fill { height: 100%; border-radius: 6px; transition: width 1s ease; }
+
+/* Player chips */
+.player-chip { border-radius: 8px; padding: 6px 10px; font-size: 0.78rem; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center; border: 1px solid; }
+
+/* Speaker queue */
+.queue-item { font-size: 0.8rem; padding: 5px 0; border-bottom: 1px solid #0e2044; display: flex; align-items: center; gap: 6px; }
+
+#debug-log { background: #071530; border: 1px solid #0e2044; border-radius: 6px; padding: 5px 8px; font-size: 0.65rem; color: #3A3F8F; max-height: 60px; overflow-y: auto; font-family: monospace; margin-top: 8px; }
 </style>
 </head>
 <body>
 
 <!-- SETUP -->
 <div id="setup-screen">
-  <div class="stars-accent">★ ★ ★ ★ ★</div>
+  <div style="font-size:0.85rem;color:#B0C4FF;letter-spacing:3px;">★ ★ ★ ★ ★</div>
   <h1>🏛️ Legislative Simulation</h1>
-  <p>A classroom role-play exploring the principle of incrementalism in policymaking.</p>
-  <div id="setup-form">
-    <label>Select a Policy Topic for Round 1</label>
-    <select id="topic-r1">
-      <option value="healthcare">Healthcare Reform</option>
-      <option value="climate">Climate &amp; Energy Policy</option>
-      <option value="education">Education Funding</option>
-      <option value="immigration">Immigration Reform</option>
-      <option value="guncontrol">Gun Control</option>
-      <option value="housing">Affordable Housing</option>
-    </select>
-    <label>Select a Policy Topic for Round 2</label>
-    <select id="topic-r2">
-      <option value="climate">Climate &amp; Energy Policy</option>
-      <option value="healthcare">Healthcare Reform</option>
-      <option value="education">Education Funding</option>
-      <option value="immigration">Immigration Reform</option>
-      <option value="guncontrol">Gun Control</option>
-      <option value="housing">Affordable Housing</option>
-    </select>
-    <button class="btn btn-danger" onclick="startSetup()" style="margin-top:6px;font-size:1rem;padding:12px;">🚀 Launch Session</button>
-  </div>
+  <p>Customize each legislator's bill below. Choose a topic and the bill will auto-fill — or write your own. Each bill is secretly tagged as incremental or sweeping. Extra players are assigned as fellow Congress members who can react and vote.</p>
+  <div class="setup-grid" id="setup-grid"></div>
+  <button class="btn btn-danger" onclick="startSetup()" style="margin-top:8px;font-size:1rem;padding:12px 32px;">🚀 Launch Session</button>
 </div>
 
 <!-- HEADER -->
 <header>
-  <h1>🏛️ Legislative Simulation — Host Dashboard</h1>
-  <div id="code-box">
+  <h1>🏛️ Legislative Simulation — Host</h1>
+  <div style="text-align:right;">
     <div style="font-size:0.7rem;color:#f0c0c0;text-transform:uppercase;letter-spacing:1px;">Game Code</div>
     <div id="game-code-display">----</div>
     <div id="player-url-hint">Players: <span id="player-url" style="color:#FFD700;"></span></div>
@@ -122,62 +109,56 @@ h2 { font-size: 0.85rem; color: #B0C4FF; text-transform: uppercase; letter-spaci
 <div>
   <div id="phase-banner">⏳ Waiting for players to join...</div>
 
-  <div style="margin-bottom:14px;">
-    <span class="round-dot active" id="rd1">1</span>
-    <span class="round-dot" id="rd2">2</span>
-    <span style="font-size:0.8rem;color:#B0C4FF;">Round Progress</span>
+  <!-- Bills Overview -->
+  <div class="card">
+    <h2>📋 Bills on the Floor</h2>
+    <div id="bills-grid"></div>
   </div>
 
-  <div class="card" id="policy-card">
-    <h2>Policy Scenario</h2>
-    <div id="policy-title">Waiting to launch...</div>
-    <div id="policy-desc" style="margin-top:6px;"></div>
-    <div id="bill-box">
-      <div id="bill-label">Proposed Bill</div>
-      <div id="bill-text">–</div>
-      <div id="bill-type-reveal"></div>
-    </div>
+  <!-- Caucus Timer -->
+  <div class="card" id="caucus-box">
+    <h2>⏱ Caucus Time — Review Bills &amp; Prepare</h2>
+    <p style="font-size:0.82rem;color:#B0C4FF;margin-bottom:10px;">Lead legislators: review your bill and prepare your argument. Congress members: read all the bills!</p>
+    <div id="caucus-timer">3:00</div>
+    <div id="caucus-bar-bg"><div id="caucus-bar" style="width:100%;"></div></div>
   </div>
 
-  <div class="card" id="speaker-card" style="display:none;">
-    <h2>Now Speaking</h2>
+  <!-- Speaker Box -->
+  <div class="card" id="speaker-box">
+    <h2>🎤 Now Speaking</h2>
     <div id="speaker-name">–</div>
-    <div id="speaker-role">–</div>
-    <div id="speaker-stance">–</div>
-    <div id="speaker-interest">–</div>
-    <div style="margin-top:14px;">
-      <div id="timer-display">1:30</div>
-      <div id="timer-bar-bg"><div id="timer-bar" style="width:100%"></div></div>
-    </div>
-    <div id="reaction-stage-label" style="margin-top:12px;font-size:0.7rem;color:#B0C4FF;text-transform:uppercase;letter-spacing:1px;">Live Public Reactions</div>
+    <div id="speaker-title">–</div>
+    <div id="speaker-bill">–</div>
+    <div id="timer-display">1:30</div>
+    <div id="timer-bar-bg"><div id="timer-bar" style="width:100%;"></div></div>
+    <div style="font-size:0.72rem;color:#B0C4FF;text-transform:uppercase;letter-spacing:1px;margin-top:10px;">Live Reactions</div>
     <div id="reaction-stage"></div>
   </div>
 
-  <div class="card" id="vote-results">
-    <h2>Vote Results</h2>
-    <div id="result-verdict">–</div>
-    <div id="vote-bar-wrap">
-      <div class="vote-bar-row">
-        <span style="width:80px;">Major Roles</span>
-        <div class="vote-bar-bg"><div class="vote-bar-fill" id="bar-major-yes" style="width:0%;background:#B22234;"></div></div>
-        <span id="lbl-major">–</span>
-      </div>
-      <div class="vote-bar-row">
-        <span style="width:80px;">Public</span>
-        <div class="vote-bar-bg"><div class="vote-bar-fill" id="bar-public-yes" style="width:0%;background:#3A3F8F;"></div></div>
-        <span id="lbl-public">–</span>
-      </div>
-    </div>
-    <div id="result-explanation" style="margin-top:12px;"></div>
+  <!-- Live Vote Tally -->
+  <div class="card" id="voting-tally-box">
+    <h2>🗳️ Live Vote Tally — Current Bill</h2>
+    <div id="current-bill-voting-label" style="font-size:0.85rem;color:#FFD700;margin-bottom:10px;"></div>
+    <div id="voting-tally-bars"></div>
+    <div id="votes-cast-count" style="font-size:0.78rem;color:#B0C4FF;margin-top:8px;"></div>
   </div>
 
+  <!-- Results -->
+  <div class="card" id="results-box">
+    <h2>📊 All Bill Results</h2>
+    <div id="results-bars"></div>
+    <div id="results-reveal" style="margin-top:14px;"></div>
+  </div>
+
+  <!-- Controls -->
   <div class="card">
     <h2>Host Controls</h2>
     <div class="btn-row">
-      <button class="btn btn-primary" id="btn-start-round" onclick="startRound()" disabled>▶ Start Round</button>
-      <button class="btn" id="btn-next-speaker" onclick="nextSpeaker()" disabled style="background:#FFD700;color:#0a1628;">⏭ Next Speaker</button>
-      <button class="btn btn-success" id="btn-open-vote" onclick="openVote()" disabled>🗳 Open Vote</button>
-      <button class="btn btn-primary" id="btn-show-results" onclick="showResults()" disabled>📊 Show Results</button>
+      <button class="btn btn-success" id="btn-start" onclick="startSim()" disabled>▶ Start Simulation</button>
+      <button class="btn btn-gold" id="btn-next-speaker" onclick="nextSpeaker()" disabled>⏭ Next Speaker</button>
+      <button class="btn btn-primary" id="btn-open-vote" onclick="openVote()" disabled>🗳 Open Vote on Bill</button>
+      <button class="btn btn-primary" id="btn-close-vote" onclick="closeVote()" disabled>✅ Close Vote &amp; Next</button>
+      <button class="btn btn-primary" id="btn-results" onclick="showResults()" disabled>📊 Show All Results</button>
       <button class="btn btn-danger" onclick="resetGame()">↺ Reset</button>
     </div>
     <div id="debug-log">Debug ready...</div>
@@ -188,18 +169,21 @@ h2 { font-size: 0.85rem; color: #B0C4FF; text-transform: uppercase; letter-spaci
 <div>
   <div class="card">
     <h2>Players (<span id="player-count">0</span>)</h2>
-    <div id="players-list"><div style="color:#B0C4FF;font-size:0.82rem;">Waiting for players...</div></div>
+    <div style="font-size:0.72rem;color:#B0C4FF;margin-bottom:8px;">
+      <span id="leg-count">0</span> Lead Legislators &nbsp;·&nbsp; <span id="congress-count">0</span> Congress Members
+    </div>
+    <div id="players-list"><div style="color:#B0C4FF;font-size:0.82rem;">Waiting...</div></div>
   </div>
   <div class="card">
     <h2>Speaker Queue</h2>
-    <div id="speaker-queue"><div style="color:#B0C4FF;font-size:0.82rem;">Round not started yet.</div></div>
+    <div id="speaker-queue"><div style="color:#B0C4FF;font-size:0.82rem;">Not started.</div></div>
   </div>
   <div class="card">
     <h2>Incrementalism Guide</h2>
-    <div style="font-size:0.78rem;color:#B0C4FF;line-height:1.6;">
-      <div>📌 <strong style="color:#FFD700;">Incremental bills</strong> make small changes. They face less opposition, pass more easily, but have limited immediate impact.</div>
-      <div style="margin-top:6px;">📌 <strong style="color:#B22234;">Sweeping reforms</strong> make large changes. They face more opposition, may be gutted by compromise, but can have large impact if passed intact.</div>
-      <div style="margin-top:6px;">📌 The bill type is <strong style="color:#FFFFFF;">revealed after the vote.</strong> Listen to arguments — can you tell which it is?</div>
+    <div style="font-size:0.76rem;color:#B0C4FF;line-height:1.6;">
+      <div>📌 <strong style="color:#FFD700;">Incremental bills</strong> — small changes, less opposition, easier to pass, limited but reliable impact.</div>
+      <div style="margin-top:6px;">📌 <strong style="color:#B22234;">Sweeping reforms</strong> — large changes, more opposition, harder to pass, bigger impact if successful.</div>
+      <div style="margin-top:6px;">📌 <strong style="color:#FFFFFF;">Bill types revealed after all votes.</strong></div>
     </div>
   </div>
 </div>
@@ -212,90 +196,192 @@ import { getDatabase, ref, set, get, onValue, update, push } from "https://www.g
 const FB_URL = "https://legislative-game-default-rtdb.firebaseio.com";
 function log(m) { const el = document.getElementById('debug-log'); el.innerHTML += `<div>${new Date().toLocaleTimeString()}: ${m}</div>`; el.scrollTop = el.scrollHeight; }
 
-const MAJOR_CHARS = [
-  { key: "Senator",   name: "Senator Olive Politicks",  role: "U.S. Senator",               icon: "🏛️", interest: "Represents a swing state with large rural and urban populations. Prioritizes bipartisan compromise to maintain electability while advancing moderate reforms." },
-  { key: "HouseRep",  name: "Rep. Marcus Ledger",       role: "U.S. House Representative",  icon: "📋", interest: "Represents a competitive suburban district. Focused on constituent services and is sensitive to economic impacts of legislation on middle-class families." },
-  { key: "LobbyistA", name: "Vera Cashwell",            role: "Corporate Interest Lobbyist", icon: "💼", interest: "Represents major industry groups and corporate donors. Focused on minimizing regulatory burden and protecting existing market structures." },
-  { key: "LobbyistB", name: "Hank Pressure",            role: "Public Interest Lobbyist",   icon: "✊", interest: "Represents nonprofit advocacy coalitions and civil society groups. Pushes for bold, systemic change to address long-standing inequities." },
-  { key: "Executive", name: "Secretary Diana Powers",   role: "Cabinet Secretary",           icon: "🦅", interest: "Serves in the President's cabinet overseeing this policy area. Balances the administration's policy goals with political feasibility and budget constraints." },
-  { key: "MediaRep",  name: "Sal Scoop",                role: "Senior Political Journalist", icon: "📺", interest: "Covers Washington policy for a major national outlet. Has the power to shape public perception and define the political narrative around this legislation." }
+// ── LEGISLATORS ───────────────────────────────────────────────────────────────
+const LEGISLATORS = [
+  { key: "LEG1", name: "Sen. Olive Politicks",  title: "U.S. Senator, Majority Caucus",           color: "#1a6fc9", colorName: "Blue",   textColor: "#fff" },
+  { key: "LEG2", name: "Rep. Marcus Ledger",    title: "U.S. Representative, Finance Committee",  color: "#B22234", colorName: "Red",    textColor: "#fff" },
+  { key: "LEG3", name: "Sen. Diana Chambers",   title: "U.S. Senator, Health & Labor Committee",  color: "#B8860B", colorName: "Gold",   textColor: "#fff" },
+  { key: "LEG4", name: "Rep. Victor Greystone", title: "U.S. Representative, Energy Committee",   color: "#1a7a4a", colorName: "Green",  textColor: "#fff" },
+  { key: "LEG5", name: "Sen. Hank Mercer",      title: "U.S. Senator, Judiciary Committee",       color: "#6a3fa0", colorName: "Purple", textColor: "#fff" },
+  { key: "LEG6", name: "Rep. Clara Voss",       title: "U.S. Representative, Education Committee",color: "#c65d00", colorName: "Orange", textColor: "#fff" }
 ];
 
-const SCENARIOS = {
-  healthcare: {
-    problem: "The Healthcare Access Crisis",
-    problemDesc: "Over 30 million Americans remain uninsured, and medical debt is the leading cause of personal bankruptcy. Premiums have risen 40% in five years. Congress must act — but how far should it go?",
-    incremental: { bill: "The Healthcare Stabilization Act: Expand Medicaid eligibility by 5%, cap out-of-pocket drug costs at $2,000 per year, and require price transparency from hospitals.", type: "incremental", explanation: "This was an incremental bill. It made targeted, achievable changes within the existing system. Incremental bills like this face less opposition because they threaten fewer interests — but their impact is limited and may not solve the underlying crisis." },
-    sweeping: { bill: "The American Health Security Act: Establish a universal public insurance option available to all Americans, mandate coverage of mental health and dental care, and cap premiums at 8% of household income.", type: "sweeping", explanation: "This was a sweeping reform bill. It attempted large-scale change to the insurance system, triggering fierce opposition from insurers and fiscal conservatives. Even with majority support, sweeping reforms often get gutted through compromise or blocked entirely." }
-  },
-  climate: {
-    problem: "The Climate Emergency",
-    problemDesc: "The last decade was the hottest on record. Extreme weather events cost the U.S. over $150 billion annually. Scientists warn that without action, consequences will worsen dramatically. But energy jobs are at stake.",
-    incremental: { bill: "The Clean Energy Investment Act: Extend and expand federal tax credits for solar, wind, and battery storage for 10 years, and fund job retraining for fossil fuel workers.", type: "incremental", explanation: "This was an incremental bill. It used market incentives rather than mandates, making it more politically viable. Incremental climate policy can build clean energy capacity over time without triggering a political backlash — but it may be too slow given the urgency." },
-    sweeping: { bill: "The Green Transition Act: Mandate that 80% of U.S. electricity come from renewables by 2032, ban new fossil fuel extraction permits, and create a federal green jobs guarantee.", type: "sweeping", explanation: "This was a sweeping reform bill. It attempted a rapid, structural transformation of the energy economy. Such bills face enormous opposition from fossil fuel interests and energy-dependent states, and often require years of negotiation that dilute their impact." }
-  },
-  education: {
-    problem: "The Education Equity Gap",
-    problemDesc: "The wealthiest school districts spend 3x more per student than the poorest. Test scores, graduation rates, and college attendance are deeply tied to zip code. Federal education funding has failed to close the gap.",
-    incremental: { bill: "The Title I Improvement Act: Increase federal Title I funding for low-income schools by 15%, require states to report spending equity data, and fund mentorship programs in underserved districts.", type: "incremental", explanation: "This was an incremental bill. By working within the existing funding framework, it avoided the political fight over local control of schools. Incremental education reforms can steadily improve outcomes — but they leave the root cause of inequity untouched." },
-    sweeping: { bill: "The Educational Equity and Opportunity Act: Federalize 40% of K-12 funding, equalize per-pupil spending within each state, and mandate universal pre-K for all children ages 3-5.", type: "sweeping", explanation: "This was a sweeping reform bill. It challenged the local control of education — one of the most deeply held values in American politics. Sweeping education reforms routinely face constitutional challenges, suburban parent backlash, and coalition collapse in Congress." }
-  },
-  immigration: {
-    problem: "The Immigration System Breakdown",
-    problemDesc: "Over 11 million undocumented people live in the U.S. The immigration court backlog exceeds 3 million cases. Border crossings remain high while legal immigration pathways are overcrowded. The system is broken.",
-    incremental: { bill: "The Immigration Court Modernization Act: Fund 600 new immigration judges, create a fast-track visa renewal process for long-term residents, and expand temporary work visas for agriculture.", type: "incremental", explanation: "This was an incremental bill. By targeting administrative capacity rather than legal status, it avoided the most polarizing aspects of immigration reform. Incremental fixes can reduce backlogs — but they don't address the underlying status of millions of residents." },
-    sweeping: { bill: "The New American Promise Act: Create a 10-year pathway to citizenship for undocumented residents with no serious criminal record, reform the visa system to prioritize skills, and establish a new border processing framework.", type: "sweeping", explanation: "This was a sweeping reform bill. Comprehensive immigration reform has failed multiple times in Congress due to the intensity of political opposition. Even bipartisan agreements have collapsed under pressure from party bases on both sides." }
-  },
-  guncontrol: {
-    problem: "The Gun Violence Epidemic",
-    problemDesc: "The U.S. has the highest rate of gun deaths among wealthy nations. Mass shootings average more than one per day. Yet Congress has passed minimal gun legislation in 25 years. How much can actually get done?",
-    incremental: { bill: "The Firearm Safety Modernization Act: Require background checks for all private and gun show sales, fund community violence intervention programs, and create a federal red flag law framework for states to adopt.", type: "incremental", explanation: "This was an incremental bill. Background checks have near-universal public support and even bipartisan backing in polls. Incremental gun legislation works within constitutional limits and existing political coalitions — but leaves most of the underlying access problem unsolved." },
-    sweeping: { bill: "The Public Safety and Firearms Reduction Act: Institute a mandatory 14-day waiting period on all gun purchases, ban assault-style weapons and high-capacity magazines, and establish a voluntary federal buyback program.", type: "sweeping", explanation: "This was a sweeping reform bill. Assault weapon bans and buyback programs trigger intense Second Amendment opposition and have repeatedly failed to clear the Senate. Sweeping gun legislation often energizes opposition more than supporters." }
-  },
-  housing: {
-    problem: "The Affordable Housing Crisis",
-    problemDesc: "Home prices have increased 45% in five years. Rents have outpaced wages in every major city. Half of renters spend more than 30% of income on housing. Homelessness is rising. The market has failed to produce affordable supply.",
-    incremental: { bill: "The Affordable Housing Tax Credit Expansion Act: Double the Low-Income Housing Tax Credit, fund rental assistance vouchers for 500,000 additional households, and streamline zoning approval for affordable developments.", type: "incremental", explanation: "This was an incremental bill. Expanding existing tax credit programs and vouchers works within the private market framework, making it more acceptable to developers and fiscal conservatives. Incremental housing policy can add supply gradually — but cannot keep pace with the scale of the crisis." },
-    sweeping: { bill: "The National Housing for All Act: Create a federal right to affordable housing, fund 1.5 million new public housing units over 5 years, and establish federal zoning standards overriding local exclusionary zoning laws.", type: "sweeping", explanation: "This was a sweeping reform bill. Overriding local zoning and funding massive public housing is one of the most politically explosive proposals in domestic policy. It faces opposition from property owners, local governments, fiscal conservatives, and even some progressive communities resistant to development." }
-  }
+const CONGRESS_TITLES = ["U.S. Senator", "U.S. Representative"];
+
+// ── PRESET BILLS ──────────────────────────────────────────────────────────────
+const PRESET_BILLS = {
+  healthcare_inc: { text: "The Healthcare Stabilization Act: Expand Medicaid eligibility by 5%, cap out-of-pocket drug costs at $2,000/year, and require hospital price transparency.", type: "incremental" },
+  healthcare_swe: { text: "The American Health Security Act: Establish a universal public insurance option for all Americans, mandate mental health and dental coverage, and cap premiums at 8% of household income.", type: "sweeping" },
+  climate_inc:    { text: "The Clean Energy Investment Act: Extend federal tax credits for solar and wind energy for 10 years and fund job retraining for fossil fuel workers.", type: "incremental" },
+  climate_swe:    { text: "The Green Transition Act: Mandate 80% renewable electricity by 2032, ban new fossil fuel extraction permits, and create a federal green jobs guarantee.", type: "sweeping" },
+  education_inc:  { text: "The Title I Improvement Act: Increase federal Title I funding for low-income schools by 15% and fund mentorship programs in underserved districts.", type: "incremental" },
+  education_swe:  { text: "The Educational Equity Act: Federalize 40% of K-12 funding, equalize per-pupil spending within each state, and mandate universal pre-K for children ages 3–5.", type: "sweeping" },
+  immigration_inc:{ text: "The Immigration Court Modernization Act: Fund 600 new immigration judges, create fast-track visa renewals for long-term residents, and expand agricultural work visas.", type: "incremental" },
+  immigration_swe:{ text: "The New American Promise Act: Create a 10-year citizenship pathway for undocumented residents with no serious criminal record and reform the visa system to prioritize skills.", type: "sweeping" },
+  gun_inc:        { text: "The Firearm Safety Act: Require background checks for all private sales, fund community violence intervention programs, and establish a federal red flag law framework.", type: "incremental" },
+  gun_swe:        { text: "The Public Safety Act: Institute a 14-day waiting period on all gun purchases, ban assault-style weapons and high-capacity magazines, and create a voluntary federal buyback program.", type: "sweeping" },
+  housing_inc:    { text: "The Affordable Housing Tax Credit Expansion Act: Double the Low-Income Housing Tax Credit and fund rental assistance vouchers for 500,000 additional households.", type: "incremental" },
+  housing_swe:    { text: "The National Housing for All Act: Establish a federal right to affordable housing, fund 1.5 million new public housing units in 5 years, and override exclusionary local zoning laws.", type: "sweeping" },
 };
 
-let db, gameCode, currentRound = 0, currentSpeakerIdx = -1, speakerOrder = [], timerInterval = null, timerSeconds = 90, gameState = {}, roundTopics = [];
+// ── BUILD SETUP UI ────────────────────────────────────────────────────────────
+const setupGrid = document.getElementById('setup-grid');
+LEGISLATORS.forEach((leg, i) => {
+  const card = document.createElement('div');
+  card.className = 'setup-bill-card';
+  card.style.borderColor = leg.color;
+  card.innerHTML = `
+    <label style="color:${leg.color};">${leg.colorName} — ${leg.name}</label>
+    <div style="font-size:0.72rem;color:#B0C4FF;margin-bottom:4px;">${leg.title}</div>
+    <select id="preset-${i}" onchange="applyPreset(${i})">
+      <option value="">— Choose a preset bill —</option>
+      <optgroup label="Healthcare">
+        <option value="healthcare_inc">Healthcare (Incremental)</option>
+        <option value="healthcare_swe">Healthcare (Sweeping)</option>
+      </optgroup>
+      <optgroup label="Climate">
+        <option value="climate_inc">Climate (Incremental)</option>
+        <option value="climate_swe">Climate (Sweeping)</option>
+      </optgroup>
+      <optgroup label="Education">
+        <option value="education_inc">Education (Incremental)</option>
+        <option value="education_swe">Education (Sweeping)</option>
+      </optgroup>
+      <optgroup label="Immigration">
+        <option value="immigration_inc">Immigration (Incremental)</option>
+        <option value="immigration_swe">Immigration (Sweeping)</option>
+      </optgroup>
+      <optgroup label="Gun Control">
+        <option value="gun_inc">Gun Control (Incremental)</option>
+        <option value="gun_swe">Gun Control (Sweeping)</option>
+      </optgroup>
+      <optgroup label="Housing">
+        <option value="housing_inc">Housing (Incremental)</option>
+        <option value="housing_swe">Housing (Sweeping)</option>
+      </optgroup>
+    </select>
+    <textarea id="bill-text-${i}" placeholder="Bill text will appear here — or write your own..."></textarea>
+    <div style="margin-top:4px;font-size:0.72rem;color:#B0C4FF;">
+      Type: <select id="bill-type-${i}" style="background:#071530;color:#fff;border:1px solid #3A3F8F;border-radius:4px;padding:2px 4px;font-size:0.72rem;">
+        <option value="incremental">Incremental</option>
+        <option value="sweeping">Sweeping</option>
+      </select>
+    </div>`;
+  setupGrid.appendChild(card);
+});
+
+window.applyPreset = function(i) {
+  const key = document.getElementById(`preset-${i}`).value;
+  if (!key) return;
+  const bill = PRESET_BILLS[key];
+  document.getElementById(`bill-text-${i}`).value = bill.text;
+  document.getElementById(`bill-type-${i}`).value = bill.type;
+};
+
+// ── GAME STATE ────────────────────────────────────────────────────────────────
+let db, gameCode, speakerIdx = -1, timerInt = null, caucusInt = null, gameState = {}, bills = [];
+// Track per-bill vote results for final display
+let billResults = {}; // { legKey: { yes: N, no: N, passed: bool } }
+let currentVotingLegKey = null;
 
 function genCode() { return Math.random().toString(36).substring(2,7).toUpperCase(); }
 
+// ── START SETUP ───────────────────────────────────────────────────────────────
 window.startSetup = async function() {
-  roundTopics = [document.getElementById('topic-r1').value, document.getElementById('topic-r2').value];
+  bills = LEGISLATORS.map((leg, i) => ({
+    legKey: leg.key,
+    legName: leg.name,
+    legTitle: leg.title,
+    color: leg.color,
+    colorName: leg.colorName,
+    text: document.getElementById(`bill-text-${i}`).value.trim() || `${leg.name}'s bill — no text entered.`,
+    type: document.getElementById(`bill-type-${i}`).value
+  }));
+
   try {
     const app = initializeApp({ databaseURL: FB_URL }, 'host');
     db = getDatabase(app);
     gameCode = genCode();
-    await set(ref(db, `games/${gameCode}`), { code: gameCode, phase: 'lobby', round: 0, roundTopics, players: {} });
+    await set(ref(db, `games/${gameCode}`), {
+      code: gameCode,
+      phase: 'lobby',
+      legislators: LEGISLATORS.map(l => ({ key: l.key, name: l.name, title: l.title, color: l.color, colorName: l.colorName })),
+      bills: bills.map(b => ({ legKey: b.legKey, legName: b.legName, legTitle: b.legTitle, color: b.color, colorName: b.colorName, text: b.text })),
+      players: {},
+      billResults: {}
+    });
     document.getElementById('setup-screen').style.display = 'none';
     document.getElementById('game-code-display').textContent = gameCode;
     document.getElementById('player-url').textContent = window.location.href.replace('host.html','player.html');
+    renderBillsGrid();
     setupListeners();
-    document.getElementById('btn-start-round').disabled = false;
-    log(`Session live. Code: ${gameCode}`);
+    document.getElementById('btn-start').disabled = false;
+    log(`Session live: ${gameCode}`);
   } catch(e) { log(`ERROR: ${e.message}`); alert(e.message); }
 };
 
+// ── RENDER BILLS GRID ─────────────────────────────────────────────────────────
+function renderBillsGrid() {
+  document.getElementById('bills-grid').innerHTML = bills.map(b => `
+    <div class="bill-card" style="border-color:${b.color};background:${b.color}18;">
+      <div class="legislator-name" style="color:${b.color};">${b.legName}</div>
+      <div style="font-size:0.72rem;color:#B0C4FF;">${b.legTitle}</div>
+      <div class="bill-text">${b.text}</div>
+    </div>`).join('');
+}
+
+// ── LISTENERS ─────────────────────────────────────────────────────────────────
 function setupListeners() {
   onValue(ref(db, `games/${gameCode}/players`), snap => {
     const players = snap.val() || {};
-    const count = Object.keys(players).length;
-    document.getElementById('player-count').textContent = count;
+    const allPlayers = Object.values(players);
+    const legPlayers = allPlayers.filter(p => p.isLegislator);
+    const congressPlayers = allPlayers.filter(p => !p.isLegislator);
+
+    document.getElementById('player-count').textContent = allPlayers.length;
+    document.getElementById('leg-count').textContent = legPlayers.length;
+    document.getElementById('congress-count').textContent = congressPlayers.length;
+
     const list = document.getElementById('players-list');
-    if (!count) { list.innerHTML = '<div style="color:#B0C4FF;font-size:0.82rem;">Waiting for players...</div>'; return; }
-    list.innerHTML = Object.values(players).map(p => `
-      <div class="player-chip">
-        <div>
-          <div style="font-size:0.82rem;color:#fff;">${p.name || '–'}</div>
-          <div class="role-tag">${p.charName || 'Unassigned'}</div>
-        </div>
-        ${p.voted ? '<span class="voted-tag">Voted</span>' : ''}
-      </div>`).join('');
+    if (!allPlayers.length) { list.innerHTML = '<div style="color:#B0C4FF;font-size:0.82rem;">Waiting...</div>'; return; }
+
+    let html = '';
+
+    // Lead Legislators group
+    if (legPlayers.length) {
+      html += `<div style="font-size:0.72rem;color:#FFD700;font-weight:bold;margin-bottom:4px;margin-top:4px;">LEAD LEGISLATORS</div>`;
+      legPlayers.forEach(p => {
+        const leg = LEGISLATORS.find(l => l.key === p.legKey) || {};
+        html += `<div class="player-chip" style="background:${leg.color||'#3A3F8F'}18;border-color:${leg.color||'#3A3F8F'}44;">
+          <span>${p.name}</span>
+          <div style="display:flex;gap:4px;align-items:center;">
+            <span style="font-size:0.68rem;background:${leg.color||'#3A3F8F'};color:#fff;padding:1px 5px;border-radius:4px;">LEG</span>
+            ${p.voted ? '<span style="font-size:0.68rem;background:#27ae60;color:#fff;padding:1px 5px;border-radius:4px;">Voted</span>' : ''}
+          </div>
+        </div>`;
+      });
+    }
+
+    // Congress Members group
+    if (congressPlayers.length) {
+      html += `<div style="font-size:0.72rem;color:#B0C4FF;font-weight:bold;margin-bottom:4px;margin-top:10px;">CONGRESS MEMBERS</div>`;
+      congressPlayers.forEach(p => {
+        html += `<div class="player-chip" style="background:#3A3F8F18;border-color:#3A3F8F44;">
+          <span>${p.name}</span>
+          <div style="display:flex;gap:4px;align-items:center;">
+            <span style="font-size:0.68rem;background:#3A3F8F;color:#fff;padding:1px 5px;border-radius:4px;">${p.congressTitle||'CONGRESS'}</span>
+            ${p.voted ? '<span style="font-size:0.68rem;background:#27ae60;color:#fff;padding:1px 5px;border-radius:4px;">Voted</span>' : ''}
+          </div>
+        </div>`;
+      });
+    }
+
+    list.innerHTML = html;
+
+    // Update live tally if voting is open
+    if (currentVotingLegKey) updateLiveTally(players);
   });
+
   onValue(ref(db, `games/${gameCode}`), snap => { gameState = snap.val() || {}; });
   onValue(ref(db, `games/${gameCode}/reactions`), snap => {
     const r = snap.val(); if (!r) return;
@@ -304,196 +390,283 @@ function setupListeners() {
   });
 }
 
-window.startRound = async function() {
-  currentRound++;
-  if (currentRound > 2) { alert('Both rounds complete!'); return; }
-  for (let i = 1; i <= 2; i++)
-    document.getElementById(`rd${i}`).className = 'round-dot' + (i < currentRound ? ' done' : i === currentRound ? ' active' : '');
+// ── LIVE TALLY ────────────────────────────────────────────────────────────────
+function updateLiveTally(players) {
+  const allPlayers = Object.values(players || {});
+  const voted = allPlayers.filter(p => p.voted && p.currentVote);
+  const yesCount = voted.filter(p => p.currentVote === 'yes').length;
+  const noCount = voted.filter(p => p.currentVote === 'no').length;
+  const total = allPlayers.length;
 
-  const topic = roundTopics[currentRound - 1];
-  const scenario = SCENARIOS[topic];
-  const billType = Math.random() < 0.5 ? 'incremental' : 'sweeping';
-  const bill = scenario[billType];
-  speakerOrder = MAJOR_CHARS.map(c => c.key);
-  currentSpeakerIdx = -1;
+  document.getElementById('votes-cast-count').textContent = `${voted.length} of ${total} votes cast`;
 
+  const yesPct = total ? (yesCount / total * 100) : 0;
+  const noPct = total ? (noCount / total * 100) : 0;
+
+  document.getElementById('voting-tally-bars').innerHTML = `
+    <div class="tally-row">
+      <span style="width:40px;color:#27ae60;font-weight:bold;">YES</span>
+      <div class="tally-bar-bg"><div class="tally-bar-fill" style="width:${yesPct}%;background:#27ae60;">${yesCount}</div></div>
+      <span style="width:30px;text-align:right;">${yesCount}</span>
+    </div>
+    <div class="tally-row">
+      <span style="width:40px;color:#B22234;font-weight:bold;">NO</span>
+      <div class="tally-bar-bg"><div class="tally-bar-fill" style="width:${noPct}%;background:#B22234;">${noCount}</div></div>
+      <span style="width:30px;text-align:right;">${noCount}</span>
+    </div>`;
+}
+
+// ── START SIMULATION ──────────────────────────────────────────────────────────
+window.startSim = async function() {
   const players = gameState.players || {};
-  const assigned = assignCharacters(Object.keys(players));
+  const pids = Object.keys(players);
+  const shuffled = [...pids].sort(() => Math.random() - 0.5);
+
   const updates = {};
-  updates[`games/${gameCode}/phase`] = 'speaking';
-  updates[`games/${gameCode}/round`] = currentRound;
-  updates[`games/${gameCode}/topic`] = topic;
-  updates[`games/${gameCode}/billType`] = billType;
-  updates[`games/${gameCode}/bill`] = bill.bill;
-  updates[`games/${gameCode}/scenario`] = { problem: scenario.problem, problemDesc: scenario.problemDesc };
+
+  // First 6 (or fewer) players become lead legislators
+  LEGISLATORS.forEach((leg, i) => {
+    if (i < shuffled.length) {
+      const pid = shuffled[i];
+      updates[`games/${gameCode}/players/${pid}/legKey`] = leg.key;
+      updates[`games/${gameCode}/players/${pid}/legName`] = leg.name;
+      updates[`games/${gameCode}/players/${pid}/legTitle`] = leg.title;
+      updates[`games/${gameCode}/players/${pid}/legColor`] = leg.color;
+      updates[`games/${gameCode}/players/${pid}/legColorName`] = leg.colorName;
+      updates[`games/${gameCode}/players/${pid}/isLegislator`] = true;
+      updates[`games/${gameCode}/players/${pid}/billText`] = bills[i].text;
+      updates[`games/${gameCode}/players/${pid}/voted`] = false;
+      updates[`games/${gameCode}/players/${pid}/currentVote`] = null;
+    }
+  });
+
+  // Remaining players become independent Congress members
+  shuffled.slice(LEGISLATORS.length).forEach((pid) => {
+    const isRep = Math.random() < 0.5;
+    const title = isRep ? 'U.S. Representative' : 'U.S. Senator';
+    updates[`games/${gameCode}/players/${pid}/isLegislator`] = false;
+    updates[`games/${gameCode}/players/${pid}/congressTitle`] = title;
+    updates[`games/${gameCode}/players/${pid}/legKey`] = null;
+    updates[`games/${gameCode}/players/${pid}/voted`] = false;
+    updates[`games/${gameCode}/players/${pid}/currentVote`] = null;
+  });
+
+  updates[`games/${gameCode}/phase`] = 'caucus';
   updates[`games/${gameCode}/currentSpeaker`] = null;
   updates[`games/${gameCode}/reactions`] = null;
-  updates[`games/${gameCode}/votes`] = null;
-  Object.entries(assigned).forEach(([pid, c]) => {
-    updates[`games/${gameCode}/players/${pid}/charKey`] = c.charKey;
-    updates[`games/${gameCode}/players/${pid}/charName`] = c.charName;
-    updates[`games/${gameCode}/players/${pid}/charRole`] = c.charRole;
-    updates[`games/${gameCode}/players/${pid}/charIcon`] = c.charIcon;
-    updates[`games/${gameCode}/players/${pid}/stance`] = c.stance;
-    updates[`games/${gameCode}/players/${pid}/interest`] = c.interest;
-    updates[`games/${gameCode}/players/${pid}/isMajor`] = c.isMajor;
-    updates[`games/${gameCode}/players/${pid}/voted`] = false;
-    updates[`games/${gameCode}/players/${pid}/vote`] = null;
-  });
+  updates[`games/${gameCode}/currentVotingBill`] = null;
+  updates[`games/${gameCode}/billResults`] = {};
+
   await update(ref(db), updates);
 
-  document.getElementById('policy-title').textContent = scenario.problem;
-  document.getElementById('policy-desc').textContent = scenario.problemDesc;
-  document.getElementById('bill-text').textContent = bill.bill;
-  document.getElementById('bill-type-reveal').style.display = 'none';
-  document.getElementById('vote-results').style.display = 'none';
-  document.getElementById('speaker-card').style.display = 'none';
-  document.getElementById('phase-banner').textContent = `🎬 Round ${currentRound} — Scenario revealed. Press "Next Speaker" to begin.`;
-  document.getElementById('speaker-queue').innerHTML = MAJOR_CHARS.map((c,i) =>
-    `<div style="font-size:0.8rem;padding:4px 0;color:#B0C4FF;border-bottom:1px solid #0e2044;">
-      <span style="color:#FFD700;">${i+1}.</span> ${c.icon} ${c.name}
-    </div>`).join('');
-  document.getElementById('btn-start-round').disabled = true;
-  document.getElementById('btn-next-speaker').disabled = false;
-  log(`Round ${currentRound} live. Topic: ${topic}, Type: ${billType}`);
+  document.getElementById('btn-start').disabled = true;
+  document.getElementById('phase-banner').textContent = '🤝 3-Minute Caucus — Read the bills and prepare your arguments!';
+  document.getElementById('caucus-box').style.display = 'block';
+  startCaucusTimer();
 };
 
-function assignCharacters(playerIds) {
-  const stances = ['incrementalism', 'large-scale reform'];
-  const assigned = {};
-  const shuffled = [...playerIds].sort(() => Math.random() - 0.5);
-  MAJOR_CHARS.forEach((char, i) => {
-    if (i < shuffled.length) assigned[shuffled[i]] = {
-      charKey: char.key, charName: char.name, charRole: char.role,
-      charIcon: char.icon, interest: char.interest,
-      stance: stances[Math.floor(Math.random() * 2)], isMajor: true
-    };
-  });
-  shuffled.slice(MAJOR_CHARS.length).forEach(pid => {
-    assigned[pid] = {
-      charKey: 'Public', charName: 'Public Opinion Member', charRole: 'Constituent',
-      charIcon: '👥', interest: 'You represent everyday citizens.',
-      stance: stances[Math.floor(Math.random() * 2)], isMajor: false
-    };
-  });
-  return assigned;
-}
-
-window.nextSpeaker = async function() {
-  stopTimer();
-  currentSpeakerIdx++;
-  if (currentSpeakerIdx >= speakerOrder.length) {
-    document.getElementById('speaker-card').style.display = 'none';
-    document.getElementById('phase-banner').textContent = '🗳️ All speakers done! Open the vote when ready.';
-    document.getElementById('btn-next-speaker').disabled = true;
-    document.getElementById('btn-open-vote').disabled = false;
-    await update(ref(db, `games/${gameCode}`), { currentSpeaker: null, phase: 'pre-vote' });
-    return;
-  }
-  const charKey = speakerOrder[currentSpeakerIdx];
-  const char = MAJOR_CHARS.find(c => c.key === charKey);
-  const player = Object.values(gameState.players || {}).find(p => p.charKey === charKey);
-  const stance = player?.stance || 'incrementalism';
-  const stanceColor = stance === 'incrementalism' ? '#27ae60' : '#B22234';
-
-  document.getElementById('speaker-card').style.display = 'block';
-  document.getElementById('speaker-name').textContent = `${char.icon} ${char.name}`;
-  document.getElementById('speaker-role').textContent = char.role;
-  document.getElementById('speaker-stance').textContent = `Stance: ${stance.toUpperCase()}`;
-  document.getElementById('speaker-stance').style.background = stanceColor + '33';
-  document.getElementById('speaker-stance').style.color = stanceColor;
-  document.getElementById('speaker-interest').textContent = `"${char.interest}"`;
-  document.getElementById('reaction-stage').innerHTML = '';
-  document.getElementById('phase-banner').textContent = `🎤 ${char.name} — ${char.role} is now speaking`;
-
-  document.getElementById('speaker-queue').innerHTML = MAJOR_CHARS.map((c,i) => {
-    const done = i < currentSpeakerIdx, active = i === currentSpeakerIdx;
-    return `<div style="font-size:0.8rem;padding:4px 0;color:${active?'#FFFFFF':done?'#27ae60':'#B0C4FF'};border-bottom:1px solid #0e2044;${active?'font-weight:bold;':''}">
-      <span style="color:#FFD700;">${i+1}.</span> ${c.icon} ${c.name} ${done?'✔':''}${active?'← NOW':''}
-    </div>`;
-  }).join('');
-
-  await update(ref(db, `games/${gameCode}`), { currentSpeaker: charKey, phase: 'speaking' });
-  startTimer();
-};
-
-function startTimer() {
-  timerSeconds = 90; updateTimerDisplay();
-  timerInterval = setInterval(() => {
-    timerSeconds--;
-    updateTimerDisplay();
-    const pct = (timerSeconds / 90) * 100;
-    document.getElementById('timer-bar').style.width = pct + '%';
-    document.getElementById('timer-bar').style.background = timerSeconds > 45 ? '#27ae60' : timerSeconds > 20 ? '#FFD700' : '#B22234';
-    if (timerSeconds <= 0) stopTimer();
+// ── CAUCUS TIMER ──────────────────────────────────────────────────────────────
+function startCaucusTimer() {
+  let secs = 180;
+  updateCaucus(secs);
+  caucusInt = setInterval(() => {
+    secs--;
+    updateCaucus(secs);
+    if (secs <= 0) {
+      clearInterval(caucusInt);
+      document.getElementById('caucus-timer').textContent = '0:00';
+      document.getElementById('caucus-bar').style.width = '0%';
+      document.getElementById('phase-banner').textContent = '⏰ Caucus time is up! Press "Next Speaker" to begin presentations.';
+      document.getElementById('btn-next-speaker').disabled = false;
+    }
   }, 1000);
 }
-function stopTimer() { clearInterval(timerInterval); timerInterval = null; }
-function updateTimerDisplay() {
-  const m = Math.floor(timerSeconds / 60), s = timerSeconds % 60;
-  const el = document.getElementById('timer-display');
-  el.textContent = `${m}:${s.toString().padStart(2,'0')}`;
-  el.className = timerSeconds > 45 ? '' : timerSeconds > 20 ? 'warning' : 'danger';
+function updateCaucus(secs) {
+  const m = Math.floor(secs/60), s = secs%60;
+  document.getElementById('caucus-timer').textContent = `${m}:${s.toString().padStart(2,'0')}`;
+  document.getElementById('caucus-bar').style.width = (secs/180*100) + '%';
+  document.getElementById('caucus-bar').style.background = secs > 60 ? '#FFD700' : '#B22234';
 }
 
+// ── SPEAKERS ──────────────────────────────────────────────────────────────────
+window.nextSpeaker = async function() {
+  stopTimer();
+  speakerIdx++;
+  if (speakerIdx >= LEGISLATORS.length) {
+    document.getElementById('speaker-box').style.display = 'none';
+    document.getElementById('phase-banner').textContent = '🗳️ All legislators have spoken! All bills have been voted on. Show results when ready.';
+    document.getElementById('btn-next-speaker').disabled = true;
+    document.getElementById('btn-results').disabled = false;
+    await update(ref(db, `games/${gameCode}`), { phase: 'done', currentSpeaker: null });
+    return;
+  }
+
+  const leg = LEGISLATORS[speakerIdx];
+  const bill = bills[speakerIdx];
+
+  document.getElementById('speaker-box').style.display = 'block';
+  document.getElementById('speaker-name').textContent = leg.name;
+  document.getElementById('speaker-name').style.color = leg.color;
+  document.getElementById('speaker-title').textContent = leg.title;
+  document.getElementById('speaker-bill').textContent = bill.text;
+  document.getElementById('speaker-bill').style.borderLeft = `4px solid ${leg.color}`;
+  document.getElementById('reaction-stage').innerHTML = '';
+  document.getElementById('phase-banner').textContent = `🎤 ${leg.name} is presenting their bill`;
+
+  // Disable open-vote until speech is done (host can still open early)
+  document.getElementById('btn-open-vote').disabled = false;
+  document.getElementById('btn-next-speaker').disabled = true;
+
+  updateSpeakerQueue();
+  await update(ref(db, `games/${gameCode}`), { currentSpeaker: leg.key, phase: 'speaking' });
+  startSpeechTimer();
+};
+
+function updateSpeakerQueue() {
+  document.getElementById('speaker-queue').innerHTML = LEGISLATORS.map((l,i) => {
+    const done = i < speakerIdx, active = i === speakerIdx;
+    const result = billResults[l.key];
+    const resultTag = result ? (result.passed
+      ? `<span style="color:#27ae60;font-size:0.7rem;">✔ Passed</span>`
+      : `<span style="color:#ff6666;font-size:0.7rem;">✘ Failed</span>`) : '';
+    return `<div class="queue-item" style="color:${active?'#fff':done?'#27ae60':'#B0C4FF'};${active?'font-weight:bold;':''}">
+      <span style="width:10px;height:10px;border-radius:50%;background:${l.color};display:inline-block;flex-shrink:0;"></span>
+      <span style="flex:1;">${l.name} ${done?'✔':''}${active?'← NOW':''}</span>
+      ${resultTag}
+    </div>`;
+  }).join('');
+}
+
+// ── SPEECH TIMER ──────────────────────────────────────────────────────────────
+function startSpeechTimer() {
+  let secs = 90; updateSpeechTimer(secs);
+  timerInt = setInterval(() => {
+    secs--;
+    updateSpeechTimer(secs);
+    document.getElementById('timer-bar').style.width = (secs/90*100) + '%';
+    document.getElementById('timer-bar').style.background = secs > 45 ? '#27ae60' : secs > 20 ? '#FFD700' : '#B22234';
+    if (secs <= 0) stopTimer();
+  }, 1000);
+}
+function stopTimer() { clearInterval(timerInt); timerInt = null; }
+function updateSpeechTimer(s) {
+  const el = document.getElementById('timer-display');
+  el.textContent = `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`;
+  el.className = s > 45 ? '' : s > 20 ? 'warning' : 'danger';
+}
+
+// ── REACTIONS ─────────────────────────────────────────────────────────────────
 function showReaction(text) {
   const stage = document.getElementById('reaction-stage');
   const el = document.createElement('div');
   el.className = 'reaction-bubble';
   el.textContent = text;
-  el.style.left = (10 + Math.random() * 70) + '%';
-  el.style.bottom = '10px';
+  el.style.left = (5 + Math.random() * 80) + '%';
+  el.style.bottom = '8px';
   stage.appendChild(el);
   setTimeout(() => el.remove(), 3200);
 }
 
+// ── OPEN VOTE ON CURRENT BILL ─────────────────────────────────────────────────
 window.openVote = async function() {
-  await update(ref(db, `games/${gameCode}`), { phase: 'voting' });
-  document.getElementById('phase-banner').textContent = '🗳️ Voting is open! All players cast your vote now.';
+  stopTimer();
+  const leg = LEGISLATORS[speakerIdx];
+  const bill = bills[speakerIdx];
+  currentVotingLegKey = leg.key;
+
+  // Reset all player votes for this round
+  const players = gameState.players || {};
+  const resetUpdates = {};
+  Object.keys(players).forEach(pid => {
+    resetUpdates[`games/${gameCode}/players/${pid}/voted`] = false;
+    resetUpdates[`games/${gameCode}/players/${pid}/currentVote`] = null;
+  });
+  resetUpdates[`games/${gameCode}/phase`] = 'voting';
+  resetUpdates[`games/${gameCode}/currentVotingBill`] = { legKey: leg.key, legName: leg.name, color: leg.color, text: bill.text };
+
+  await update(ref(db), resetUpdates);
+
+  document.getElementById('voting-tally-box').style.display = 'block';
+  document.getElementById('current-bill-voting-label').textContent = `Voting on: ${leg.name}'s Bill`;
+  document.getElementById('voting-tally-bars').innerHTML = '';
+  document.getElementById('phase-banner').textContent = `🗳️ Voting open — ${leg.name}'s bill. Everyone vote YES or NO!`;
   document.getElementById('btn-open-vote').disabled = true;
-  document.getElementById('btn-show-results').disabled = false;
+  document.getElementById('btn-close-vote').disabled = false;
+  log(`Vote opened for ${leg.key}`);
 };
 
+// ── CLOSE VOTE & RECORD ───────────────────────────────────────────────────────
+window.closeVote = async function() {
+  const snap = await get(ref(db, `games/${gameCode}/players`));
+  const players = Object.values(snap.val() || {});
+  const yesCount = players.filter(p => p.currentVote === 'yes').length;
+  const noCount = players.filter(p => p.currentVote === 'no').length;
+  const passed = yesCount > noCount;
+
+  billResults[currentVotingLegKey] = { yes: yesCount, no: noCount, passed };
+
+  await update(ref(db, `games/${gameCode}/billResults/${currentVotingLegKey}`), { yes: yesCount, no: noCount, passed });
+  await update(ref(db, `games/${gameCode}`), { phase: 'between', currentVotingBill: null });
+
+  document.getElementById('btn-close-vote').disabled = true;
+  document.getElementById('btn-open-vote').disabled = true;
+  document.getElementById('btn-next-speaker').disabled = false;
+  document.getElementById('voting-tally-box').style.display = 'none';
+
+  const leg = LEGISLATORS[speakerIdx];
+  document.getElementById('phase-banner').textContent = `${passed ? '✅ Passed' : '❌ Failed'}: ${leg.name}'s bill — ${yesCount} YES / ${noCount} NO. Press "Next Speaker" to continue.`;
+  updateSpeakerQueue();
+  currentVotingLegKey = null;
+  log(`Vote closed: ${leg.key} — ${passed?'PASSED':'FAILED'} (${yesCount}Y / ${noCount}N)`);
+};
+
+// ── FINAL RESULTS ─────────────────────────────────────────────────────────────
 window.showResults = async function() {
-  const snap = await get(ref(db, `games/${gameCode}`));
-  const state = snap.val();
-  const players = Object.values(state.players || {});
-  const topic = roundTopics[currentRound - 1];
-  const billType = state.billType;
-  const scenario = SCENARIOS[topic][billType];
+  document.getElementById('results-box').style.display = 'block';
 
-  const major = players.filter(p => p.isMajor);
-  const pub = players.filter(p => !p.isMajor);
-  const majorYes = major.filter(p => p.vote === 'yes').length;
-  const majorNo = major.filter(p => p.vote === 'no').length;
-  const pubYes = pub.filter(p => p.vote === 'yes').length;
-  const pubTotal = pub.length || 1;
-  const pubYesPct = pubYes / pubTotal;
-  const publicVote = pubYesPct >= 0.6 ? 1 : 0;
-  const totalYes = majorYes + publicVote;
-  const totalNo = majorNo + (publicVote === 0 ? 1 : 0);
-  const passed = totalYes > totalNo;
+  document.getElementById('results-bars').innerHTML = bills.map(b => {
+    const r = billResults[b.legKey] || { yes: 0, no: 0, passed: false };
+    const total = r.yes + r.no;
+    const yesPct = total ? (r.yes / total * 100) : 0;
+    const noPct = total ? (r.no / total * 100) : 0;
+    return `<div style="margin-bottom:14px;">
+      <div style="color:${b.color};font-weight:bold;font-size:0.88rem;margin-bottom:4px;">
+        ${b.legName} 
+        <span style="color:${r.passed?'#27ae60':'#ff6666'};margin-left:8px;">${r.passed?'✅ PASSED':'❌ FAILED'}</span>
+      </div>
+      <div class="result-row">
+        <span style="width:38px;color:#27ae60;font-size:0.78rem;">YES</span>
+        <div class="result-bar-bg"><div class="result-bar-fill" style="width:${yesPct}%;background:#27ae60;"></div></div>
+        <span style="width:28px;text-align:right;font-size:0.8rem;">${r.yes}</span>
+      </div>
+      <div class="result-row">
+        <span style="width:38px;color:#B22234;font-size:0.78rem;">NO</span>
+        <div class="result-bar-bg"><div class="result-bar-fill" style="width:${noPct}%;background:#B22234;"></div></div>
+        <span style="width:28px;text-align:right;font-size:0.8rem;">${r.no}</span>
+      </div>
+    </div>`;
+  }).join('');
 
-  const btEl = document.getElementById('bill-type-reveal');
-  btEl.style.display = 'block';
-  btEl.style.background = billType === 'incremental' ? '#1a4a2a' : '#4a0a0a';
-  btEl.style.color = billType === 'incremental' ? '#27ae60' : '#ff6666';
-  btEl.textContent = `🔍 This was a ${billType.toUpperCase()} bill.`;
+  document.getElementById('results-reveal').innerHTML = `
+    <div style="font-size:0.78rem;color:#B0C4FF;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Bill Types Revealed</div>
+    ${bills.map(b => {
+      const r = billResults[b.legKey] || { passed: false };
+      return `<div style="padding:6px 10px;border-radius:6px;margin-bottom:5px;background:${b.type==='incremental'?'#0a2a14':'#2a0a0a'};border-left:3px solid ${b.color};">
+        <span style="color:${b.color};font-weight:bold;">${b.legName}:</span>
+        <span style="color:${b.type==='incremental'?'#27ae60':'#ff6666'};font-weight:bold;margin-left:6px;">${b.type.toUpperCase()}</span>
+        <span style="color:${r.passed?'#27ae60':'#ff6666'};margin-left:8px;font-size:0.8rem;">${r.passed?'✅ Passed':'❌ Failed'}</span>
+        <div style="font-size:0.75rem;color:#B0C4FF;margin-top:2px;">${b.type==='incremental'
+          ? 'Incremental — targeted change, lower opposition, limited but reliable impact.'
+          : 'Sweeping — large-scale reform, high opposition, powerful but risky.'}</div>
+      </div>`;
+    }).join('')}
+    <div style="margin-top:10px;padding:10px;background:#0e2044;border-radius:8px;font-size:0.82rem;color:#B0C4FF;line-height:1.6;">
+      <strong style="color:#FFD700;">Reflect:</strong> Did incremental or sweeping bills pass more often? Which faced the most opposition? What does this reveal about how real legislation gets passed?
+    </div>`;
 
-  document.getElementById('vote-results').style.display = 'block';
-  document.getElementById('result-verdict').innerHTML = passed
-    ? `<span style="color:#27ae60;">✅ Bill Passed (${totalYes}–${totalNo})</span>`
-    : `<span style="color:#ff6666;">❌ Bill Failed (${totalYes}–${totalNo})</span>`;
-  document.getElementById('bar-major-yes').style.width = (major.length ? majorYes/major.length*100 : 0) + '%';
-  document.getElementById('lbl-major').textContent = `${majorYes}/${major.length} yes`;
-  document.getElementById('bar-public-yes').style.width = (pubYesPct * 100) + '%';
-  document.getElementById('lbl-public').textContent = `${pubYes}/${pubTotal} yes (${pubYesPct >= 0.6 ? 'counts as 1 vote' : 'below 60% — no vote'})`;
-  document.getElementById('result-explanation').textContent = scenario.explanation;
-
-  await update(ref(db, `games/${gameCode}`), { phase: 'results', passed, billType, resultSummary: scenario.explanation });
-  document.getElementById('phase-banner').textContent = passed ? '✅ Bill Passed! Results revealed.' : '❌ Bill Failed. Results revealed.';
-  document.getElementById('btn-show-results').disabled = true;
-  if (currentRound < 2) document.getElementById('btn-start-round').disabled = false;
+  await update(ref(db, `games/${gameCode}`), { phase: 'results', billResults });
+  document.getElementById('phase-banner').textContent = '📊 Final results revealed! Bill types now shown.';
+  document.getElementById('btn-results').disabled = true;
 };
 
 window.resetGame = function() { if (confirm('Reset session?')) location.reload(); };
