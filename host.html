@@ -461,6 +461,8 @@ const EVENTS = [
 
 let db, gameCode, currentRound = 0, totalImpact = 0, gameState = {}, scenario;
 
+function safeKey(str) { return str.replace(/[.#$/[\]]/g, '_'); }
+
 function genCode() { return Math.random().toString(36).substring(2,7).toUpperCase(); }
 
 window.startSetup = async function() {
@@ -531,7 +533,7 @@ window.startRound = async function() {
   const roundInfo = scenario.rounds[currentRound - 1];
   const prompts = {};
   for (const [role, arr] of Object.entries(scenario.rolePrompts))
-    prompts[role] = arr[currentRound - 1];
+    prompts[safeKey(role)] = arr[currentRound - 1];
 
   log(`Round ${currentRound} bill: ${roundInfo.billOption}`);
 
