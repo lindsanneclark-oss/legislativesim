@@ -185,17 +185,25 @@ window.confirmRole = async function() {
   document.getElementById('lobby-bill').textContent = s.title;
   document.getElementById('lobby-desc').textContent = s.description;
   show('screen-lobby');
-  listenToGame();
+  // Small delay to ensure Firebase write completes before listener attaches
+  setTimeout(() => listenToGame(), 500);
 };
 
 function listenToGame() {
   onValue(ref(db, `games/${gameCode}`), snap => {
     const state = snap.val();
     if (!state) return;
-    if (state.phase === 'round' && state.round !== currentRound) {
-      currentRound = state.round;
+    const phase = state.phase;
+    const round = state.round;
+
+    // Always react to round phase regardless of currentRound tracking
+    if (phase === 'round' && round !== currentRound) {
+      currentRound = round;
       showActionScreen(state);
-    } else if ((state.phase === 'between' || state.phase === 'done') && document.getElementById('screen-action').classList.contains('active')) {
+    } else if (phase === 'round' && round === currentRound && document.getElementById('screen-lobby').classList.contains('active')) {
+      // Catch case where listener attached after round already started
+      showActionScreen(state);
+    } else if ((phase === 'between' || phase === 'done') && document.getElementById('screen-action').classList.contains('active')) {
       showResultScreen(state);
     }
   });
